@@ -1,5 +1,6 @@
 {
-    "name": "NSW Beachwatch",
-    "homeassistant": "2025.2.4",
-    "hacs": "2.0.5"
+  "name": "NSW Beachwatch",
+  "content_in_root": false,
+  "country": "AU",
+  "homeassistant": "2025.1.0"
 }
