@@ -44,7 +44,7 @@ class NSWBeachwatchAPI:
                                         "forecast": props.get("pollutionForecast", "Unknown"),
                                         "bacteria": props.get("latestResult"),
                                         "stars": props.get("latestResultRating"),
-                                        "date": props.get("latestResultObservationDate"),
+                                        "sample_date": props.get("latestResultObservationDate"),
                                     }
             except Exception as err:
                 _LOGGER.error("Error fetching status for %s: %s", beach_name, err)
