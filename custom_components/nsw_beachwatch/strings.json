@@ -2,22 +2,17 @@
   "config": {
     "step": {
       "user": {
+        "title": "Select Beach",
+        "description": "Choose the beach you want to monitor for water quality and pollution.",
         "data": {
           "beach_name": "Beach Name"
         }
       }
     },
-    "abort": {
-      "already_configured": "This beach is already configured."
+    "error": {
+      "cannot_connect": "Failed to connect to Beachwatch API. Please check your internet or try again later.",
+      "unknown": "An unexpected error occurred."
     }
   },
-  "options": {
-    "step": {
-      "init": {
-        "data": {
-          "update_interval": "Update Interval (minutes)"
-        }
-      }
-    }
-  }
+  "title": "NSW Beachwatch"
 }
