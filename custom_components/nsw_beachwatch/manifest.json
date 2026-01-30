@@ -1,12 +1,11 @@
 {
-  "domain": "integration_blueprint",
-  "name": "Integration blueprint",
-  "codeowners": [
-    "@ludeeus"
-  ],
+  "domain": "nsw_beachwatch",
+  "name": "NSW Beachwatch",
+  "codeowners": ["@PlanetCitizen1829381"],
   "config_flow": true,
-  "documentation": "https://github.com/ludeeus/integration_blueprint",
+  "documentation": "https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch",
+  "integration_type": "service",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/ludeeus/integration_blueprint/issues",
-  "version": "0.1.0"
+  "issue_tracker": "https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/issues",
+  "version": "1.0.0"
 }
