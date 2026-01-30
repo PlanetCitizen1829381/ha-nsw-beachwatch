@@ -2,19 +2,20 @@
   "config": {
     "step": {
       "user": {
-        "title": "NSW Beachwatch",
-        "description": "Choose a beach to monitor for pollution and safety.",
         "data": {
           "beach_name": "Beach Name"
         }
       }
+    },
+    "abort": {
+      "already_configured": "This beach is already configured."
     }
   },
   "options": {
     "step": {
       "init": {
         "data": {
-          "update_interval": "Update Interval (Minutes)"
+          "update_interval": "Update Interval (minutes)"
         }
       }
     }
