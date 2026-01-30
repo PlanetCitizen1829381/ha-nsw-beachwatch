@@ -49,12 +49,12 @@ class NSWBeachwatchSensor(SensorEntity):
     def icon(self):
         if self._key == "status":
             state_lower = str(self._state).lower()
-            if "unlikely" in state_lower: return "mdi:beach"
-            if "possible" in state_lower: return "mdi:alert"
-            return "mdi:alert-octagon"
-        if self._key == "advice": return "mdi:information"
+            if "unlikely" in state_lower: return "mdi:water-check"
+            if "possible" in state_lower: return "mdi:water-alert"
+            return "mdi:water-off"
+        if self._key == "advice": return "mdi:swim"
         if self._key == "bacteria": return "mdi:microscope"
-        if self._key == "stars": return "mdi:star"
+        if self._key == "stars": return "mdi:star-circle"
         return "mdi:help-circle"
 
     async def async_update(self):
@@ -71,11 +71,11 @@ class NSWBeachwatchSensor(SensorEntity):
         elif self._key == "advice":
             forecast = str(data.get("forecast", "")).lower()
             if "unlikely" in forecast:
-                self._state = "Pollution unlikely. Water quality is suitable for swimming. Enjoy your swim!"
+                self._state = "Water quality is suitable for swimming. Enjoy your swim!"
             elif "possible" in forecast:
-                self._state = "Pollution possible. Caution advised for swimming. Young children or elderly may be at increased risk."
+                self._state = "Caution advised for swimming. Young children or elderly may be at increased risk."
             elif "likely" in forecast:
-                self._state = "Pollution likely. Water quality is unsuitable for swimming. Avoid swimming today."
+                self._state = "Water quality is unsuitable for swimming. Avoid swimming today."
             else:
                 self._state = "Forecast unavailable. Check for signs of pollution before swimming."
         elif self._key == "stars":
