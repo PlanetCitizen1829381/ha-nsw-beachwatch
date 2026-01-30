@@ -27,11 +27,6 @@ class NSWBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if not beach_names:
             return self.async_abort(reason="cannot_connect")
 
-        # Convert simple list to searchable Label/Value pairs for the 2026 UI
-        searchable_options = [
-            {"value": name, "label": name} for name in beach_names
-        ]
-
         if user_input is not None:
             return self.async_create_entry(
                 title=user_input["beach"], 
@@ -43,8 +38,10 @@ class NSWBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({
                 vol.Required("beach"): SelectSelector(
                     SelectSelectorConfig(
-                        options=searchable_options,
+                        options=beach_names,
                         mode=SelectSelectorMode.DROPDOWN,
+                        # custom_value=True forces the searchable combobox in 2026
+                        custom_value=True,
                         sort=True,
                     )
                 ),
