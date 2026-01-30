@@ -2,14 +2,12 @@ import logging
 from datetime import timedelta
 from homeassistant.components.sensor import SensorEntity
 from .const import DOMAIN
-from .api import BeachwatchAPI
 
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(minutes=30)
 
 async def async_setup_entry(hass, entry, async_add_entities):
     beach_name = entry.data.get("beach_name")
-    # Pull the API client created in __init__.py
     api = hass.data[DOMAIN][entry.entry_id]
     async_add_entities([NSWBeachwatchSensor(api, beach_name)], True)
 
@@ -22,6 +20,21 @@ class NSWBeachwatchSensor(SensorEntity):
         self._state = "Unknown"
         self._attr_extra_state_attributes = {}
 
+    @property
+    def state(self):
+        return self._state
+
+    @property
+    def icon(self):
+        state_lower = str(self._state).lower()
+        if "unlikely" in state_lower:
+            return "mdi:beach"
+        if "possible" in state_lower:
+            return "mdi:alert"
+        if "likely" in state_lower:
+            return "mdi:alert-octagon"
+        return "mdi:help-circle"
+
     async def async_update(self):
         props = await self._api.get_beach_data(self._beach_name)
         
@@ -30,22 +43,28 @@ class NSWBeachwatchSensor(SensorEntity):
             return
 
         forecast = props.get("pollutionForecast", "Unknown")
-        self._state = forecast
+        forecast_lower = forecast.lower()
 
-        # Determine advice based on the API response
-        if "Unlikely" in forecast:
-            suitability, advice = "Suitable", "Enjoy your swim!"
-        elif "Possible" in forecast:
-            suitability, advice = "Caution", "Pollution is possible."
-        elif "Likely" in forecast:
-            suitability, advice = "Unsuitable", "Avoid swimming today."
+        if "unlikely" in forecast_lower:
+            suitability = "Suitable"
+            advice = "Enjoy your swim! Water quality is likely to be good."
+        elif "possible" in forecast_lower:
+            suitability = "Caution"
+            advice = "Caution: Water quality is usually good, but pollution is possible. High-risk groups should consider delaying."
+        elif "likely" in forecast_lower:
+            suitability = "Unsuitable"
+            advice = "Avoid swimming: Pollution is likely. Water quality is expected to be poor."
         else:
-            suitability, advice = "Unknown", "No forecast available."
+            suitability = "Unknown"
+            advice = "Forecast not available. Always check local signs before swimming."
 
+        self._state = forecast
         self._attr_extra_state_attributes = {
             "swimming_suitability": suitability,
             "swimming_advice": advice,
             "star_rating": props.get("latestResultRating"),
             "latest_result": props.get("latestResult"),
             "last_sampled": props.get("latestResultObservationDate"),
+            "forecast_updated": props.get("pollutionForecastTimeStamp"),
+            "beach_id": props.get("id")
         }
