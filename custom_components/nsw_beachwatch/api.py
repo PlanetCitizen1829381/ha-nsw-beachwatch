@@ -21,13 +21,13 @@ class NSWBeachwatchApiClient:
                 response.raise_for_status()
                 data = await response.json()
                 
-                # We search the GeoJSON features for the matching beach name
+              
                 for feature in data.get("features", []):
                     props = feature.get("properties", {})
                     if props.get("site_name").lower() == beach_name.lower():
                         return props
                 
-                # If we get here, the beach wasn't found
+                
                 LOGGER.error("Beach '%s' not found in NSW Beachwatch data", beach_name)
                 return {}
 
