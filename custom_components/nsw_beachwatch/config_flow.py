@@ -21,11 +21,16 @@ class NSWBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         api = NSWBeachwatchAPI()
         
-        # Fetch the real-time list of beaches from the API
-        beaches = await api.get_all_beaches()
+        # Fetch the list of beach names
+        beach_names = await api.get_all_beaches()
 
-        if not beaches:
+        if not beach_names:
             return self.async_abort(reason="cannot_connect")
+
+        # Convert simple list to searchable Label/Value pairs for the 2026 UI
+        searchable_options = [
+            {"value": name, "label": name} for name in beach_names
+        ]
 
         if user_input is not None:
             return self.async_create_entry(
@@ -38,9 +43,8 @@ class NSWBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({
                 vol.Required("beach"): SelectSelector(
                     SelectSelectorConfig(
-                        options=beaches,
+                        options=searchable_options,
                         mode=SelectSelectorMode.DROPDOWN,
-                        # This enables the search/filter behavior
                         sort=True,
                     )
                 ),
