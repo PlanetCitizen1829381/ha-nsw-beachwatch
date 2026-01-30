@@ -3,14 +3,14 @@
     "step": {
       "user": {
         "title": "Select Beach",
-        "description": "Choose the beach you want to monitor for water quality and pollution.",
+        "description": "Choose the beach you want to monitor for water quality and pollution status.",
         "data": {
           "beach_name": "Beach Name"
         }
       }
     },
     "error": {
-      "cannot_connect": "Failed to connect to Beachwatch API. Please check your internet or try again later.",
+      "cannot_connect": "Failed to connect to the NSW Beachwatch API. Please check your connection.",
       "unknown": "An unexpected error occurred."
     }
   },
