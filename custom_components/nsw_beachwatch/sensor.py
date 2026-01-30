@@ -5,18 +5,18 @@ from homeassistant.helpers.entity import DeviceInfo
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
-SCAN_INTERVAL = timedelta(minutes=30)
 
 async def async_setup_entry(hass, entry, async_add_entities):
     beach_name = entry.data.get("beach_name")
     api = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([NSWBeachwatchSensor(api, beach_name, entry.entry_id)], True)
+    interval = entry.options.get("update_interval", 30)
+    async_add_entities([NSWBeachwatchSensor(api, beach_name, interval)], True)
 
 class NSWBeachwatchSensor(SensorEntity):
     _attr_has_entity_name = True
     _attr_name = "Status"
 
-    def __init__(self, api, beach_name, entry_id):
+    def __init__(self, api, beach_name, interval):
         self._api = api
         self._beach_name = beach_name
         self._attr_unique_id = f"bw_stat_{beach_name.lower().replace(' ', '_')}"
@@ -29,6 +29,11 @@ class NSWBeachwatchSensor(SensorEntity):
         )
         self._state = "Unknown"
         self._attr_extra_state_attributes = {}
+        self._update_interval = timedelta(minutes=interval)
+
+    @property
+    def scan_interval(self):
+        return self._update_interval
 
     @property
     def state(self):
@@ -46,19 +51,16 @@ class NSWBeachwatchSensor(SensorEntity):
         if not props:
             self._state = "No Data"
             return
-
         forecast = props.get("pollutionForecast", "Unknown")
         forecast_lower = forecast.lower()
-
         if "unlikely" in forecast_lower:
-            suitability, advice = "Suitable", "Enjoy your swim! Water quality is likely to be good."
+            suitability, advice = "Suitable", "Enjoy your swim!"
         elif "possible" in forecast_lower:
-            suitability, advice = "Caution", "Caution: Water quality is usually good, but pollution is possible."
+            suitability, advice = "Caution", "Pollution is possible."
         elif "likely" in forecast_lower:
-            suitability, advice = "Unsuitable", "Avoid swimming: Pollution is likely."
+            suitability, advice = "Unsuitable", "Avoid swimming today."
         else:
             suitability, advice = "Unknown", "Check local signs."
-
         self._state = forecast
         self._attr_extra_state_attributes = {
             "swimming_suitability": suitability,
