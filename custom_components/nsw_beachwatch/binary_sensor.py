@@ -24,8 +24,6 @@ class NSWBeachwatchBinarySensor(BinarySensorEntity):
         beach_id = self._beach_name.lower().replace(' ', '_')
         entity_id = f"sensor.bw_status_{beach_id}"
         state = self.hass.states.get(entity_id)
-        
         if state and state.state:
             return "likely" in state.state.lower()
-        
         return False
