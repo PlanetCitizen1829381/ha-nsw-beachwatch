@@ -14,26 +14,29 @@ class BeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     async def _get_beaches(self):
-        """Fetch the list of beaches from the NSW Beachwatch API."""
+        """Fetch the current list of beaches from NSW Beachwatch."""
         url = "https://api.beachwatch.nsw.gov.au/public/sites/geojson"
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    # Extract site names and sort them alphabetically
-                    beaches = [
-                        feature["properties"]["siteName"]
-                        for feature in data.get("features", [])
-                    ]
-                    return sorted(beaches)
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, timeout=10) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        # Extract and sort unique site names
+                        beaches = sorted({
+                            feature["properties"]["siteName"]
+                            for feature in data.get("features", [])
+                        })
+                        return beaches
+        except Exception:
+            return []
         return []
 
     async def async_step_user(self, user_input=None):
-        """Handle the initial step where the user selects a beach."""
+        """Handle the beach selection step."""
         errors = {}
 
         if user_input is not None:
-            # Set a unique ID based on the beach name to prevent duplicates
+            # Prevent adding the same beach twice
             await self.async_set_unique_id(user_input["beach_name"])
             self._abort_if_unique_id_configured()
             
@@ -42,12 +45,13 @@ class BeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 data=user_input
             )
 
-        # Fetch the list of beaches to populate the dropdown
+        # Get the list for the dropdown
         beaches = await self._get_beaches()
         
         if not beaches:
             errors["base"] = "cannot_connect"
-            beaches = ["Bondi Beach"]  # Fallback if API fails
+            # Fallback so the user isn't stuck if the API is down
+            beaches = ["Bondi Beach", "Manly Ocean Beach"]
 
         return self.async_show_form(
             step_id="user",
@@ -56,7 +60,6 @@ class BeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     SelectSelectorConfig(
                         options=beaches,
                         mode=SelectSelectorMode.DROPDOWN,
-                        translation_key="beach_name"
                     )
                 ),
             }),
