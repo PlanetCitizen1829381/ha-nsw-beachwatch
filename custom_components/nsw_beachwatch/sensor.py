@@ -41,26 +41,36 @@ class NSWBeachwatchSensor(SensorEntity):
                         features = data.get("features", [])
                         
                         if not features:
-                            _LOGGER.warning("No data found for beach: %s", self._beach_name)
                             self._state = "No Data"
                             return
 
                         props = features[0].get("properties", {})
                         raw_forecast = props.get("pollutionForecast", "Unknown")
                         
-                        if raw_forecast in ["Unlikely", "Possible"]:
-                            self._state = f"Pollution {raw_forecast}"
+                        if "Unlikely" in raw_forecast:
+                            suitability = "Suitable"
+                            advice = "Enjoy your swim! Water quality is likely to be good."
+                        elif "Possible" in raw_forecast:
+                            suitability = "Caution"
+                            advice = "Caution: Water quality is usually good, but pollution is possible."
+                        elif "Likely" in raw_forecast:
+                            suitability = "Unsuitable"
+                            advice = "Avoid swimming: Pollution is likely. Water quality is expected to be poor."
                         else:
-                            self._state = raw_forecast
-                        
+                            suitability = "Unknown"
+                            advice = "No forecast available. Check local signs."
+
+                        self._state = raw_forecast
                         self._attr_extra_state_attributes = {
-                            "latest_result": props.get("latestResult"),
+                            "swimming_suitability": suitability,
+                            "swimming_advice": advice,
                             "star_rating": props.get("latestResultRating"),
+                            "latest_result": props.get("latestResult"),
                             "last_sampled": props.get("latestResultObservationDate"),
                             "forecast_updated": props.get("pollutionForecastTimeStamp"),
                             "beach_id": props.get("id")
                         }
                     else:
-                        _LOGGER.error("API Error %s for %s", response.status, self._beach_name)
+                        _LOGGER.error("API Error %s", response.status)
         except Exception as e:
-            _LOGGER.error("Beachwatch update failed for %s: %s", self._beach_name, e)
+            _LOGGER.error("Update failed: %s", e)
