@@ -9,20 +9,16 @@ from homeassistant.helpers.selector import (
 from .const import DOMAIN
 
 class BeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for NSW Beachwatch."""
 
     VERSION = 1
 
     async def _get_beaches(self):
-        """Fetch the current list of beaches from NSW Beachwatch."""
         url = "https://api.beachwatch.nsw.gov.au/public/sites/geojson"
         try:
-          
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, timeout=10) as response:
                     if response.status == 200:
                         data = await response.json()
-                        
                         beaches = sorted({
                             feature["properties"]["siteName"]
                             for feature in data.get("features", [])
@@ -34,20 +30,15 @@ class BeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return []
 
     async def async_step_user(self, user_input=None):
-        """Handle the beach selection step with searchable input."""
         errors = {}
-        
-        
         beaches = await self._get_beaches()
 
         if user_input is not None:
             selected_beach = user_input["beach_name"]
             
-            
             if selected_beach not in beaches:
                 errors["beach_name"] = "invalid_beach"
             else:
-            
                 await self.async_set_unique_id(selected_beach)
                 self._abort_if_unique_id_configured()
                 
@@ -67,7 +58,6 @@ class BeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     SelectSelectorConfig(
                         options=beaches,
                         mode=SelectSelectorMode.DROPDOWN,
-                  
                         custom_value=True,
                     )
                 ),
