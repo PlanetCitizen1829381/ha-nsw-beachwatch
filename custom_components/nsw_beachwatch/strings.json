@@ -3,9 +3,12 @@
     "step": {
       "user": {
         "data": {
-          "beach_name": "Select your beach"
+          "beach_name": "Beach Name"
         }
       }
+    },
+    "abort": {
+      "already_configured": "This beach is already configured."
     }
   },
   "options": {
