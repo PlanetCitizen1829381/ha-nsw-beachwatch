@@ -1,6 +1,6 @@
 import logging
 from datetime import timedelta
-from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
+from homeassistant.components.sensor import SensorEntity, EntityCategory
 from homeassistant.helpers.entity import DeviceInfo
 from .const import DOMAIN
 
@@ -14,20 +14,20 @@ async def async_setup_entry(hass, entry, async_add_entities):
     sensors = [
         NSWBeachwatchSensor(api, beach_name, interval, "Status", "status"),
         NSWBeachwatchSensor(api, beach_name, interval, "Advice", "advice"),
-        NSWBeachwatchSensor(api, beach_name, interval, "Bacteria Count", "bacteria"),
-        NSWBeachwatchSensor(api, beach_name, interval, "Star Rating", "stars")
+        NSWBeachwatchSensor(api, beach_name, interval, "Bacteria Count", "bacteria", EntityCategory.DIAGNOSTIC),
+        NSWBeachwatchSensor(api, beach_name, interval, "Star Rating", "stars", EntityCategory.DIAGNOSTIC)
     ]
-    
     async_add_entities(sensors, True)
 
 class NSWBeachwatchSensor(SensorEntity):
     _attr_has_entity_name = True
 
-    def __init__(self, api, beach_name, interval, name_suffix, key):
+    def __init__(self, api, beach_name, interval, name_suffix, key, category=None):
         self._api = api
         self._beach_name = beach_name
         self._key = key
         self._attr_name = name_suffix
+        self._attr_entity_category = category
         self._attr_unique_id = f"bw_{key}_{beach_name.lower().replace(' ', '_')}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, beach_name)},
@@ -79,6 +79,7 @@ class NSWBeachwatchSensor(SensorEntity):
             else:
                 self._state = "Check local signs."
         elif self._key == "bacteria":
-            self._state = props.get("latestResult")
+            self._state = f"{props.get('latestResult')} cfu/100mL"
         elif self._key == "stars":
-            self._state = props.get("latestResultRating")
+            rating = props.get("latestResultRating")
+            self._state = f"{rating} Stars" if rating else "No Rating"
