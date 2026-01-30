@@ -24,6 +24,12 @@ class NSWBeachSensor(SensorEntity):
     def state(self):
         return self._state
 
+    @property
+    def icon(self):
+        if "Unlikely" in str(self._state):
+            return "mdi:beach"
+        return "mdi:alert-circle"
+
     async def async_update(self):
         try:
             async with aiohttp.ClientSession() as session:
@@ -34,9 +40,15 @@ class NSWBeachSensor(SensorEntity):
                             props = feature.get("properties", {})
                             site_name = props.get("siteName", "")
                             if self._target_beach.lower() in site_name.lower():
-                                self._state = props.get("pollutionForecast")
+                                raw_forecast = props.get("pollutionForecast", "Unknown")
+                                self._state = f"Pollution {raw_forecast}" if raw_forecast in ["Unlikely", "Possible"] else raw_forecast
+                                
                                 self._attr_extra_state_attributes = {
-                                    "all_api_data": props
+                                    "latest_result": props.get("latestResult"),
+                                    "star_rating": props.get("latestResultRating"),
+                                    "last_sampled": props.get("latestResultObservationDate"),
+                                    "forecast_updated": props.get("pollutionForecastTimeStamp"),
+                                    "beach_id": props.get("id")
                                 }
                                 break
         except Exception as e:
