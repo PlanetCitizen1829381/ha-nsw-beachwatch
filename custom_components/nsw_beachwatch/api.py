@@ -1,36 +1,33 @@
-"""NSW Beachwatch API Client."""
-from __future__ import annotations
-
 import aiohttp
-import async_timeout
+import asyncio
 
-from .const import LOGGER, API_URL
-
-class NSWBeachwatchApiClient:
-    """Class to handle the API communication."""
-
-    def __init__(self, session: aiohttp.ClientSession) -> None:
-        """Initialize the API client."""
+class BeachwatchAPI:
+    def __init__(self, session: aiohttp.ClientSession):
         self._session = session
+        self._base_url = "https://api.beachwatch.nsw.gov.au/public/sites/geojson"
 
-    async def async_get_data(self, beach_name: str) -> dict:
-        """Get data from the API for a specific beach."""
+    async def get_all_beaches(self):
         try:
-            async with async_timeout.timeout(10):
-                response = await self._session.get(API_URL)
-                response.raise_for_status()
-                data = await response.json()
-                
-              
-                for feature in data.get("features", []):
-                    props = feature.get("properties", {})
-                    if props.get("site_name").lower() == beach_name.lower():
-                        return props
-                
-                
-                LOGGER.error("Beach '%s' not found in NSW Beachwatch data", beach_name)
-                return {}
+            async with self._session.get(self._base_url, timeout=10) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return sorted({
+                        f["properties"]["siteName"]
+                        for f in data.get("features", [])
+                        if f["properties"].get("siteName")
+                    })
+        except Exception:
+            return []
+        return []
 
-        except Exception as exception:
-            LOGGER.error("Error fetching data from NSW Beachwatch: %s", exception)
-            raise
+    async def get_beach_data(self, beach_name):
+        url = f"{self._base_url}?site_name={beach_name}"
+        try:
+            async with self._session.get(url, timeout=15) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    features = data.get("features", [])
+                    return features[0].get("properties") if features else None
+        except Exception:
+            return None
+        return None
