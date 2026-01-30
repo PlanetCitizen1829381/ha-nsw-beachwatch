@@ -1,55 +1,57 @@
 import aiohttp
-import logging
+from datetime import timedelta
 from homeassistant.components.sensor import SensorEntity
-from .const import DOMAIN, CONF_BEACH_NAME
+from .const import DOMAIN
 
-_LOGGER = logging.getLogger(__name__)
-
-API_URL = "https://api.beachwatch.nsw.gov.au/public/sites/geojson"
+SCAN_INTERVAL = timedelta(minutes=30)
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    beach_name = entry.data.get(CONF_BEACH_NAME)
-    async_add_entities([NSWBeachSensor(beach_name)], True)
+    """Set up the sensor from a config entry."""
+    beach_name = entry.data["beach_name"]
+    async_add_entities([NSWBeachwatchSensor(beach_name)], True)
 
-class NSWBeachSensor(SensorEntity):
+class NSWBeachwatchSensor(SensorEntity):
+    """Beachwatch sensor for a specific beach."""
 
     def __init__(self, beach_name):
-        self._target_beach = beach_name
-        self._attr_name = f"Beachwatch {beach_name}"
-        self._attr_unique_id = f"beachwatch_{beach_name.lower().replace(' ', '_')}"
-        self._state = "Unknown"
-        self._attr_extra_state_attributes = {}
+        self._beach_name = beach_name
+        self._attr_name = f"{beach_name} Pollution"
+        self._attr_unique_id = f"nsw_beachwatch_{beach_name.lower().replace(' ', '_')}"
+        self._state = None
+        self._attributes = {}
 
     @property
     def state(self):
         return self._state
 
     @property
-    def icon(self):
-        if "Unlikely" in str(self._state):
-            return "mdi:beach"
-        return "mdi:alert-circle"
+    def extra_state_attributes(self):
+        return self._attributes
 
     async def async_update(self):
+        """Fetch data for the specific beach."""
+        # Use the site_name parameter to get exactly what we need
+        url = f"https://api.beachwatch.nsw.gov.au/public/sites/geojson?site_name={self._beach_name}"
+        
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(API_URL, timeout=15) as response:
+                async with session.get(url) as response:
                     if response.status == 200:
                         data = await response.json()
-                        for feature in data.get("features", []):
-                            props = feature.get("properties", {})
-                            site_name = props.get("siteName", "")
-                            if self._target_beach.lower() in site_name.lower():
-                                raw_forecast = props.get("pollutionForecast", "Unknown")
-                                self._state = f"Pollution {raw_forecast}" if raw_forecast in ["Unlikely", "Possible"] else raw_forecast
-                                
-                                self._attr_extra_state_attributes = {
-                                    "latest_result": props.get("latestResult"),
-                                    "star_rating": props.get("latestResultRating"),
-                                    "last_sampled": props.get("latestResultObservationDate"),
-                                    "forecast_updated": props.get("pollutionForecastTimeStamp"),
-                                    "beach_id": props.get("id")
-                                }
-                                break
-        except Exception as e:
-            _LOGGER.error("Beachwatch update failed: %s", e)
+                        features = data.get("features", [])
+                        
+                        if not features:
+                            self._state = "Unknown"
+                            return
+
+                        # Get the first match
+                        props = features[0]["properties"]
+                        self._state = f"Pollution {props.get('pollutionForecast', 'Unknown')}"
+                        self._attributes = {
+                            "latest_result": props.get("latestResult"),
+                            "star_rating": props.get("latestResultRating"),
+                            "last_updated": props.get("pollutionForecastTimeStamp"),
+                            "site_name": props.get("siteName")
+                        }
+        except Exception:
+            self._state = "Error"
