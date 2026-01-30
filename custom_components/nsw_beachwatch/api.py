@@ -5,8 +5,6 @@ import asyncio
 _LOGGER = logging.getLogger(__name__)
 
 class NSWBeachwatchAPI:
-    """Interface to the NSW Beachwatch GeoJSON API."""
-
     def __init__(self):
         self.url = "https://api.beachwatch.nsw.gov.au/public/sites/geojson"
         self.headers = {
@@ -15,7 +13,6 @@ class NSWBeachwatchAPI:
         }
 
     async def get_all_beaches(self):
-        """Fetch the list of all available beach names."""
         connector = aiohttp.TCPConnector(ssl=False)
         async with aiohttp.ClientSession(connector=connector, headers=self.headers) as session:
             try:
@@ -33,7 +30,6 @@ class NSWBeachwatchAPI:
         return []
 
     async def get_beach_status(self, beach_name):
-        """Fetch the current pollution status for a specific beach."""
         connector = aiohttp.TCPConnector(ssl=False)
         async with aiohttp.ClientSession(connector=connector, headers=self.headers) as session:
             try:
@@ -45,11 +41,10 @@ class NSWBeachwatchAPI:
                                 props = feature["properties"]
                                 if props.get("siteName") == beach_name or props.get("name") == beach_name:
                                     return {
-                                        "pollution_forecast": props.get("pollutionForecast", "Unknown"),
-                                        "pollution_status": props.get("latestResult", "Unknown"),
-                                        "bacteria_level": props.get("bacteriaLevel") or props.get("latestResult"),
-                                        "star_rating": props.get("latestResultRating"),
-                                        "last_updated": props.get("latestResultObservationDate"),
+                                        "forecast": props.get("pollutionForecast", "Unknown"),
+                                        "bacteria": props.get("latestResult"),
+                                        "stars": props.get("latestResultRating"),
+                                        "date": props.get("latestResultObservationDate"),
                                     }
             except Exception as err:
                 _LOGGER.error("Error fetching status for %s: %s", beach_name, err)
