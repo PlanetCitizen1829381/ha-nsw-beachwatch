@@ -10,7 +10,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     api = hass.data[DOMAIN][entry.entry_id]
     
     sensors = [
-        NSWBeachwatchSensor(api, beach_name, "Pollution Forecast", "status"),
+        NSWBeachwatchSensor(api, beach_name, "Water Pollution", "status"),
         NSWBeachwatchSensor(api, beach_name, "Swimming Advice", "advice"),
         NSWBeachwatchSensor(api, beach_name, "Bacteria Level", "bacteria", EntityCategory.DIAGNOSTIC),
         NSWBeachwatchSensor(api, beach_name, "Beach Grade", "stars", EntityCategory.DIAGNOSTIC)
@@ -35,10 +35,15 @@ class NSWBeachwatchSensor(SensorEntity):
             configuration_url="https://www.beachwatch.nsw.gov.au",
         )
         self._state = None
+        self._attrs = {}
 
     @property
     def state(self):
         return self._state
+
+    @property
+    def extra_state_attributes(self):
+        return self._attrs
 
     @property
     def icon(self):
@@ -56,6 +61,8 @@ class NSWBeachwatchSensor(SensorEntity):
         data = await self._api.get_beach_status(self._beach_name)
         if not data: return
 
+        self._attrs["last_sample_date"] = data.get("sample_date")
+
         if self._key == "status":
             self._state = data.get("forecast")
         elif self._key == "bacteria":
@@ -64,11 +71,13 @@ class NSWBeachwatchSensor(SensorEntity):
         elif self._key == "advice":
             forecast = str(data.get("forecast", "")).lower()
             if "unlikely" in forecast:
-                self._state = "Suitable for swimming"
+                self._state = "Pollution unlikely. Water quality is suitable for swimming. Enjoy your swim!"
             elif "possible" in forecast:
-                self._state = "Caution advised"
+                self._state = "Pollution possible. Caution advised for swimming. Young children or elderly may be at increased risk."
+            elif "likely" in forecast:
+                self._state = "Pollution likely. Water quality is unsuitable for swimming. Avoid swimming today."
             else:
-                self._state = "Avoid swimming"
+                self._state = "Forecast unavailable. Check for signs of pollution before swimming."
         elif self._key == "stars":
             rating = data.get("stars")
             self._state = f"{rating} Stars" if rating else "N/A"
