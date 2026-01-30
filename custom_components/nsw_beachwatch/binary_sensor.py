@@ -21,6 +21,6 @@ class NSWBeachwatchBinarySensor(BinarySensorEntity):
 
     @property
     def is_on(self):
-        entity_id = f"sensor.beachwatch_{self._beach_name.lower().replace(' ', '_')}_status"
+        entity_id = f"sensor.{self._beach_name.lower().replace(' ', '_')}_status"
         state = self.hass.states.get(entity_id)
         return state and "Likely" in state.state
