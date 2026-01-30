@@ -11,7 +11,6 @@ class NswBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
-        # Note: We use NSWBeachwatchAPI to match your api.py file
         api = NSWBeachwatchAPI()
         beaches = await api.get_all_beaches()
         
@@ -43,7 +42,6 @@ class NswBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return NswBeachwatchOptionsFlowHandler(config_entry)
 
 class NswBeachwatchOptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle options for the integration."""
     def __init__(self, config_entry):
         self.config_entry = config_entry
 
