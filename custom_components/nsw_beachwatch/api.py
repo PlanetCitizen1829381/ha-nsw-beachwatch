@@ -1,33 +1,28 @@
 import aiohttp
 import asyncio
 
-class BeachwatchAPI:
-    def __init__(self, session: aiohttp.ClientSession):
-        self._session = session
-        self._base_url = "https://api.beachwatch.nsw.gov.au/public/sites/geojson"
+class NSWBeachwatchAPI:
+    def __init__(self):
+        self.url = "https://www.beachwatch.nsw.gov.au/api/sites"
 
     async def get_all_beaches(self):
-        try:
-            async with self._session.get(self._base_url, timeout=10) as response:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self.url) as response:
                 if response.status == 200:
                     data = await response.json()
-                    return sorted({
-                        f["properties"]["siteName"]
-                        for f in data.get("features", [])
-                        if f["properties"].get("siteName")
-                    })
-        except Exception:
-            return []
-        return []
+                    return sorted([site["name"] for site in data if "name" in site])
+                return []
 
-    async def get_beach_data(self, beach_name):
-        url = f"{self._base_url}?site_name={beach_name}"
-        try:
-            async with self._session.get(url, timeout=15) as response:
+    async def get_beach_status(self, beach_name):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self.url) as response:
                 if response.status == 200:
                     data = await response.json()
-                    features = data.get("features", [])
-                    return features[0].get("properties") if features else None
-        except Exception:
-            return None
+                    for site in data:
+                        if site.get("name") == beach_name:
+                            return {
+                                "pollution_status": site.get("pollutionStatus", "Unknown"),
+                                "bacteria_level": site.get("bacteriaLevel", "N/A"),
+                                "last_updated": site.get("lastUpdated"),
+                            }
         return None
