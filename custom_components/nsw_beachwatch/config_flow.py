@@ -1,6 +1,5 @@
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.core import callback
 from .api import NSWBeachwatchAPI
 from .const import DOMAIN
 
@@ -9,6 +8,7 @@ class NSWBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(self, user_input=None):
         errors = {}
+        beaches = []  # Fix: Initialize so it always exists
         api = NSWBeachwatchAPI()
 
         try:
@@ -18,7 +18,7 @@ class NSWBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         except Exception:
             errors["base"] = "cannot_connect"
 
-        if user_input is not None:
+        if user_input is not None and not errors:
             return self.async_create_entry(
                 title=user_input["beach_name"],
                 data=user_input
