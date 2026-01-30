@@ -42,12 +42,11 @@ class NSWBeachSensor(SensorEntity):
                             if self._target_beach.lower() in site_name.lower():
                                 self._state = props.get("pollutionForecast")
                                 self._attr_extra_state_attributes = {
-                                    "water_temperature": props.get("waterTemperature"),
-                                    "star_rating": props.get("starRating"),
-                                    "advice": props.get("forecastAdvice"),
-                                    "last_updated": props.get("pollutionForecastTimeStamp"),
-                                    "full_site_name": site_name,
-                                    "region": props.get("regionName")
+                                    "latest_rating": props.get("latestResult"),
+                                    "star_count": props.get("latestResultRating"),
+                                    "last_sampled": props.get("latestResultObservationDate"),
+                                    "forecast_updated": props.get("pollutionForecastTimeStamp"),
+                                    "full_site_name": site_name
                                 }
                                 break
         except Exception as e:
