@@ -12,7 +12,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     interval = entry.options.get("update_interval", 30)
     
     sensors = [
-        NSWBeachwatchSensor(api, beach_name, interval, "Status", "status"),
+        NSWBeachwatchSensor(api, beach_name, interval, "Pollution", "status"),
         NSWBeachwatchSensor(api, beach_name, interval, "Advice", "advice"),
         NSWBeachwatchSensor(api, beach_name, interval, "Bacteria Count", "bacteria", EntityCategory.DIAGNOSTIC),
         NSWBeachwatchSensor(api, beach_name, interval, "Star Rating", "stars", EntityCategory.DIAGNOSTIC)
