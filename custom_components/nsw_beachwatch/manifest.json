@@ -3,11 +3,9 @@
   "name": "NSW Beachwatch",
   "codeowners": ["@PlanetCitizen1829381"],
   "config_flow": true,
-  "dependencies": [],
   "documentation": "https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch",
-  "issue_tracker": "https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/issues",
   "iot_class": "cloud_polling",
-  "integration_type": "service",
+  "issue_tracker": "https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/issues",
   "requirements": [],
   "version": "1.0.0"
 }
