@@ -1,5 +1,4 @@
 import logging
-from datetime import timedelta
 from homeassistant.components.sensor import SensorEntity, EntityCategory
 from homeassistant.helpers.entity import DeviceInfo
 from .const import DOMAIN
@@ -7,31 +6,27 @@ from .const import DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    """Set up NSW Beachwatch sensors."""
     beach_name = entry.data.get("beach_name")
     api = hass.data[DOMAIN][entry.entry_id]
-    interval = entry.options.get("update_interval", 30)
     
     sensors = [
-        NSWBeachwatchSensor(api, beach_name, interval, "Status", "status"),
-        NSWBeachwatchSensor(api, beach_name, interval, "Advice", "advice"),
-        NSWBeachwatchSensor(api, beach_name, interval, "Bacteria Count", "bacteria", EntityCategory.DIAGNOSTIC),
-        NSWBeachwatchSensor(api, beach_name, interval, "Star Rating", "stars", EntityCategory.DIAGNOSTIC)
+        NSWBeachwatchSensor(api, beach_name, "Pollution Forecast", "status"),
+        NSWBeachwatchSensor(api, beach_name, "Swimming Advice", "advice"),
+        NSWBeachwatchSensor(api, beach_name, "Bacteria Level", "bacteria", EntityCategory.DIAGNOSTIC),
+        NSWBeachwatchSensor(api, beach_name, "Beach Grade", "stars", EntityCategory.DIAGNOSTIC)
     ]
     async_add_entities(sensors, True)
 
 class NSWBeachwatchSensor(SensorEntity):
-    """Representation of a NSW Beachwatch sensor."""
     _attr_has_entity_name = True
 
-    def __init__(self, api, beach_name, interval, name_suffix, key, category=None):
+    def __init__(self, api, beach_name, name_suffix, key, category=None):
         self._api = api
         self._beach_name = beach_name
         self._key = key
         self._attr_name = name_suffix
         self._attr_entity_category = category
         self._attr_unique_id = f"bw_{key}_{beach_name.lower().replace(' ', '_')}"
-        
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, beach_name)},
             name=beach_name,
@@ -40,37 +35,40 @@ class NSWBeachwatchSensor(SensorEntity):
             configuration_url="https://www.beachwatch.nsw.gov.au",
         )
         self._state = None
-        self._attributes = {}
-        self._update_interval = timedelta(minutes=interval)
-
-    @property
-    def extra_state_attributes(self):
-        return self._attributes
 
     @property
     def state(self):
         return self._state
 
-    async def async_update(self):
-        """Fetch data and update state."""
-        data = await self._api.get_beach_status(self._beach_name)
-        if not data:
-            return
+    @property
+    def icon(self):
+        if self._key == "status":
+            state_lower = str(self._state).lower()
+            if "unlikely" in state_lower: return "mdi:beach"
+            if "possible" in state_lower: return "mdi:alert"
+            return "mdi:alert-octagon"
+        if self._key == "advice": return "mdi:information"
+        if self._key == "bacteria": return "mdi:microscope"
+        if self._key == "stars": return "mdi:star"
+        return "mdi:help-circle"
 
-        self._attributes = {"last_updated": data.get("last_updated")}
+    async def async_update(self):
+        data = await self._api.get_beach_status(self._beach_name)
+        if not data: return
 
         if self._key == "status":
-            self._state = data.get("pollution_status")
+            self._state = data.get("forecast")
         elif self._key == "bacteria":
-            self._state = data.get("bacteria_level")
+            val = data.get("bacteria")
+            self._state = f"{val} cfu/100mL" if val else "N/A"
         elif self._key == "advice":
-            status = str(data.get("pollution_status", "")).lower()
-            if "unlikely" in status:
+            forecast = str(data.get("forecast", "")).lower()
+            if "unlikely" in forecast:
                 self._state = "Suitable for swimming"
-            elif "possible" in status:
+            elif "possible" in forecast:
                 self._state = "Caution advised"
             else:
                 self._state = "Avoid swimming"
         elif self._key == "stars":
-            # Mapping star rating if available in the API data
-            self._state = data.get("star_rating", "N/A")
+            rating = data.get("stars")
+            self._state = f"{rating} Stars" if rating else "N/A"
