@@ -7,5 +7,6 @@
   "documentation": "https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch",
   "issue_tracker": "https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/issues",
   "iot_class": "cloud_polling",
-  "integration_type": "device"
+  "integration_type": "service",
+  "requirements": ["aiohttp>=3.11.0"]
 }
