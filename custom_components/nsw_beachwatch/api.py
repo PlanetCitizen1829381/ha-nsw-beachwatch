@@ -16,7 +16,6 @@ class NSWBeachwatchAPI:
 
     async def get_all_beaches(self):
         """Fetch the list of all available beach names."""
-        
         connector = aiohttp.TCPConnector(ssl=False)
         async with aiohttp.ClientSession(connector=connector, headers=self.headers) as session:
             try:
@@ -27,11 +26,8 @@ class NSWBeachwatchAPI:
                             beaches = []
                             for feature in data.get("features", []):
                                 name = feature["properties"].get("siteName") or feature["properties"].get("name")
-                                if name:
-                                    beaches.append(name)
+                                if name: beaches.append(name)
                             return sorted(list(set(beaches)))
-                        else:
-                            _LOGGER.error("API returned status %s", response.status)
             except Exception as err:
                 _LOGGER.error("Error fetching beaches: %s", err)
         return []
@@ -49,8 +45,10 @@ class NSWBeachwatchAPI:
                                 props = feature["properties"]
                                 if props.get("siteName") == beach_name or props.get("name") == beach_name:
                                     return {
+                                        "pollution_forecast": props.get("pollutionForecast", "Unknown"),
                                         "pollution_status": props.get("latestResult", "Unknown"),
-                                        "bacteria_level": props.get("bacteriaLevel", "N/A"),
+                                        "bacteria_level": props.get("bacteriaLevel") or props.get("latestResult"),
+                                        "star_rating": props.get("latestResultRating"),
                                         "last_updated": props.get("latestResultObservationDate"),
                                     }
             except Exception as err:
