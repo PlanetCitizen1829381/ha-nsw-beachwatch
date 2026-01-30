@@ -2,8 +2,6 @@
   "config": {
     "step": {
       "user": {
-        "title": "NSW Beachwatch Setup",
-        "description": "Enter the name of the beach you want to monitor.",
         "data": {
           "beach_name": "Beach Name"
         }
@@ -11,8 +9,11 @@
     },
     "error": {
       "cannot_connect": "Failed to connect to Beachwatch API",
+      "invalid_auth": "Invalid authentication",
       "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "This beach is already configured."
     }
-  },
-  "title": "NSW Beachwatch"
+  }
 }
