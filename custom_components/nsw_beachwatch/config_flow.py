@@ -1,26 +1,38 @@
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.selector import SelectSelector, SelectSelectorConfig, SelectSelectorMode
-from .api import BeachwatchAPI
+from .api import NSWBeachwatchAPI
 from .const import DOMAIN
 
-class BeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class NswBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for NSW Beachwatch."""
     VERSION = 1
 
     async def async_step_user(self, user_input=None):
-        api = BeachwatchAPI(async_get_clientsession(self.hass))
+        """Handle the initial step."""
+        # Note: We use NSWBeachwatchAPI to match your api.py file
+        api = NSWBeachwatchAPI()
         beaches = await api.get_all_beaches()
+        
+        if not beaches:
+            return self.async_abort(reason="cannot_connect")
+
         if user_input is not None:
             await self.async_set_unique_id(user_input["beach_name"])
             self._abort_if_unique_id_configured()
             return self.async_create_entry(title=user_input["beach_name"], data=user_input)
+
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema({
                 vol.Required("beach_name"): SelectSelector(
-                    SelectSelectorConfig(options=beaches, mode=SelectSelectorMode.DROPDOWN, custom_value=True)
+                    SelectSelectorConfig(
+                        options=beaches, 
+                        mode=SelectSelectorMode.DROPDOWN, 
+                        custom_value=True,
+                        sort=True
+                    )
                 ),
             }),
         )
@@ -28,9 +40,10 @@ class BeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
-        return BeachwatchOptionsFlowHandler(config_entry)
+        return NswBeachwatchOptionsFlowHandler(config_entry)
 
-class BeachwatchOptionsFlowHandler(config_entries.OptionsFlow):
+class NswBeachwatchOptionsFlowHandler(config_entries.OptionsFlow):
+    """Handle options for the integration."""
     def __init__(self, config_entry):
         self.config_entry = config_entry
 
