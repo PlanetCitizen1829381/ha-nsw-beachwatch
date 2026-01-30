@@ -10,7 +10,12 @@ class NSWBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input=None):
         errors = {}
         api = NSWBeachwatchAPI()
-        beaches = await api.get_all_beaches()
+        
+        try:
+            beaches = await api.get_all_beaches()
+        except Exception:
+            errors["base"] = "cannot_connect"
+            beaches = []
 
         if user_input is not None:
             await self.async_set_unique_id(user_input["beach_name"].lower().replace(" ", "_"))
