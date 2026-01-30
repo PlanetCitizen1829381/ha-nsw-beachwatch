@@ -12,45 +12,43 @@ async def async_setup_entry(hass, entry, async_add_entities):
     async_add_entities([NSWBeachSensor(beach_name)], True)
 
 class NSWBeachSensor(SensorEntity):
+
     def __init__(self, beach_name):
-        self._beach_name = beach_name
+        self._target_beach = beach_name
         self._attr_name = f"Beachwatch {beach_name}"
         self._attr_unique_id = f"beachwatch_{beach_name.lower().replace(' ', '_')}"
-        self._state = "Discovery Mode"
+        self._state = "Unknown"
         self._attr_extra_state_attributes = {}
 
     @property
     def state(self):
         return self._state
 
+    @property
+    def icon(self):
+        if self._state == "Pollution Unlikely":
+            return "mdi:beach"
+        return "mdi:alert-circle"
+
     async def async_update(self):
-        """Fetch data and log beach names."""
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(API_URL, timeout=15) as response:
                     if response.status == 200:
                         data = await response.json()
-                        all_names = []
-                        found = False
-
                         for feature in data.get("features", []):
                             props = feature.get("properties", {})
-                            name = props.get("siteName") or props.get("site_name")
-                            all_names.append(name)
-
-                            # Check if the name matches
-                            if name and self._beach_name.lower() in name.lower():
-                                self._state = props.get("pollutionForecast") or props.get("forecast_status", "Clean")
-                                self._attr_extra_state_attributes = {"full_name": name}
-                                found = True
+                            site_name = props.get("siteName", "")
+                            if self._target_beach.lower() in site_name.lower():
+                                self._state = props.get("pollutionForecast")
+                                self._attr_extra_state_attributes = {
+                                    "water_temperature": props.get("waterTemperature"),
+                                    "star_rating": props.get("starRating"),
+                                    "advice": props.get("forecastAdvice"),
+                                    "last_updated": props.get("pollutionForecastTimeStamp"),
+                                    "full_site_name": site_name,
+                                    "region": props.get("regionName")
+                                }
                                 break
-                        
-                        # This is the "Detective" part - it prints the list to your logs
-                        if not found:
-                            _LOGGER.warning("Beach '%s' not found. Available sites: %s", self._beach_name, all_names)
-                            self._state = "Beach Not Found"
-                    else:
-                        self._state = f"API Error {response.status}"
         except Exception as e:
-            _LOGGER.error("Update failed: %s", e)
-            self._state = "Error"
+            _LOGGER.error("Beachwatch update failed: %s", e)
