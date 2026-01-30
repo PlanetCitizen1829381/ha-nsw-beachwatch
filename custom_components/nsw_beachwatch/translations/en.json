@@ -1,1 +1,23 @@
-
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "beach_name": "Beach Name"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This beach is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "update_interval": "Update Interval (minutes)"
+        }
+      }
+    }
+  }
+}
