@@ -3,9 +3,10 @@ from homeassistant.core import HomeAssistant
 from .api import NSWBeachwatchAPI
 from .const import DOMAIN
 
-PLATFORMS: list[str] = ["sensor", "binary_sensor"]
+PLATFORMS: list[str] = ["sensor"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up NSW Beachwatch from a config entry."""
     api = NSWBeachwatchAPI()
     
     hass.data.setdefault(DOMAIN, {})
@@ -16,6 +17,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     
     if unload_ok:
