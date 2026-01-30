@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, time
 from homeassistant.components.sensor import SensorEntity, EntityCategory
 from homeassistant.helpers.entity import DeviceInfo
 from .const import DOMAIN
@@ -57,11 +58,26 @@ class NSWBeachwatchSensor(SensorEntity):
         if self._key == "stars": return "mdi:star-circle"
         return "mdi:help-circle"
 
+    def _get_next_forecast_time(self):
+        now = datetime.now()
+        today_0600 = now.replace(hour=6, minute=0, second=0, microsecond=0)
+        today_1330 = now.replace(hour=13, minute=30, second=0, microsecond=0)
+
+        if now < today_0600:
+            return "Today at 6:00 AM"
+        elif now < today_1330:
+            return "Today at 1:30 PM"
+        else:
+            return "Tomorrow at 6:00 AM"
+
     async def async_update(self):
         data = await self._api.get_beach_status(self._beach_name)
         if not data: return
 
         self._attrs["last_sample_date"] = data.get("sample_date")
+        
+        if self._key == "status" or self._key == "advice":
+            self._attrs["next_expected_forecast"] = self._get_next_forecast_time()
 
         if self._key == "status":
             self._state = data.get("forecast")
@@ -77,7 +93,7 @@ class NSWBeachwatchSensor(SensorEntity):
             elif "likely" in forecast:
                 self._state = "Water quality is unsuitable for swimming. Avoid swimming today."
             else:
-                self._state = "Forecast unavailable. Check for signs of pollution before swimming."
+                self._state = "Check for signs of pollution before swimming."
         elif self._key == "stars":
             rating = data.get("stars")
             self._state = f"{rating} Stars" if rating else "N/A"
