@@ -46,10 +46,10 @@
 ## 📊 Entities
 | Icon | Entity Name | Category | Description |
 | :---: | :--- | :---: | :--- |
-| 🧪 | **Water Pollution** | Primary | Current pollution forecast state (Unlikely, Possible, Likely). |
-| ℹ️ | **Advice** | Primary | Human-readable swimming recommendation. |
-| 🔬 | **Bacteria Level** | Diagnostic | Latest Enterococci (cfu/100mL) laboratory results. |
-| ⭐ | **Beach Grade** | Diagnostic | Official Beachwatch star rating (1-4 stars). |
+| 🌊 | **Water Pollution** | Primary | Forecast state using `mdi:waves-arrow-up`. |
+| ℹ️ | **Advice** | Primary | Swimming recommendation using `mdi:information-outline`. |
+| 🔬 | **Bacteria Level** | Diagnostic | Lab results using `mdi:microscope`. |
+| ⭐ | **Beach Grade** | Diagnostic | Star rating using `mdi:star-circle`. |
 
 ---
 
@@ -79,6 +79,7 @@ These are some next steps you may want to look into:
 - Create your first release.
 - Share your integration on the [Home Assistant Forum](https://community.home-assistant.io/).
 - Submit your integration to [HACS](https://hacs.xyz/docs/publish/start).
+
 
 
 
