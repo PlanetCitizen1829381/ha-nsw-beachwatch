@@ -1,7 +1,7 @@
 <div align="center">
 
 # 🌊 NSW Beachwatch for Home Assistant
-**Real-time pollution monitoring and swimming safety for New South Wales beaches.**
+**Water pollution monitoring and swimming safety for New South Wales beaches.**
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge)](https://hacs.xyz/)
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg?style=for-the-badge)](https://my.home-assistant.io/redirect/hacs_repository/?owner=PlanetCitizen1829381&repository=ha-nsw-beachwatch&category=integration)
@@ -67,6 +67,7 @@ These are some next steps you may want to look into:
 - Create your first release.
 - Share your integration on the [Home Assistant Forum](https://community.home-assistant.io/).
 - Submit your integration to [HACS](https://hacs.xyz/docs/publish/start).
+
 
 
 
