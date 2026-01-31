@@ -28,7 +28,8 @@ class NswBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         options=beaches, 
                         mode=SelectSelectorMode.DROPDOWN, 
                         custom_value=False,
-                        sort=True
+                        sort=True,
+                        translation_key="beach_list"
                     )
                 ),
             }),
