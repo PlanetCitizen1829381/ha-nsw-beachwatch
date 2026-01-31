@@ -12,7 +12,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     
     sensors = [
         NSWBeachwatchSensor(api, beach_name, "Water Pollution", "status"),
-        NSWBeachwatchSensor(api, beach_name, "Swimming Advice", "advice"),
+        NSWBeachwatchSensor(api, beach_name, "Advice", "advice"),
         NSWBeachwatchSensor(api, beach_name, "Bacteria Level", "bacteria", EntityCategory.DIAGNOSTIC),
         NSWBeachwatchSensor(api, beach_name, "Beach Grade", "stars", EntityCategory.DIAGNOSTIC)
     ]
