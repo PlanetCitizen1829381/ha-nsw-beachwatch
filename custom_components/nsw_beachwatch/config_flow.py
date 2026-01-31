@@ -6,11 +6,9 @@ from .api import NSWBeachwatchAPI
 from .const import DOMAIN
 
 class NswBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for NSW Beachwatch."""
     VERSION = 1
 
     async def async_step_user(self, user_input=None):
-        """Handle the initial step."""
         api = NSWBeachwatchAPI()
         beaches = await api.get_all_beaches()
         
@@ -29,7 +27,7 @@ class NswBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     SelectSelectorConfig(
                         options=beaches, 
                         mode=SelectSelectorMode.DROPDOWN, 
-                        custom_value=True,
+                        custom_value=False,
                         sort=True
                     )
                 ),
