@@ -16,14 +16,5 @@
       "already_configured": "This beach is already configured.",
       "cannot_connect": "Failed to connect to Beachwatch API."
     }
-  },
-  "options": {
-    "step": {
-      "init": {
-        "data": {
-          "update_interval": "Update Interval (minutes)"
-        }
-      }
-    }
   }
 }
