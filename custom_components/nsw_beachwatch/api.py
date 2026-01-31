@@ -18,15 +18,17 @@ class NSWBeachwatchAPI:
             try:
                 async with asyncio.timeout(10):
                     async with session.get(self.url) as response:
-                        if response.status == 200:
-                            data = await response.json()
-                            beaches = []
-                            for feature in data.get("features", []):
-                                name = feature["properties"].get("siteName") or feature["properties"].get("name")
-                                if name: beaches.append(name)
-                            return sorted(list(set(beaches)))
+                        response.raise_for_status()
+                        data = await response.json()
+                        beaches = []
+                        for feature in data.get("features", []):
+                            name = feature["properties"].get("siteName") or feature["properties"].get("name")
+                            if name: beaches.append(name)
+                        return sorted(list(set(beaches)))
+            except (aiohttp.ClientError, asyncio.TimeoutError) as err:
+                _LOGGER.warning("Network issue fetching beaches: %s", err)
             except Exception as err:
-                _LOGGER.error("Error fetching beaches: %s", err)
+                _LOGGER.error("Unexpected error fetching beaches: %s", err)
         return []
 
     async def get_beach_status(self, beach_name):
@@ -35,17 +37,21 @@ class NSWBeachwatchAPI:
             try:
                 async with asyncio.timeout(10):
                     async with session.get(self.url) as response:
-                        if response.status == 200:
-                            data = await response.json()
-                            for feature in data.get("features", []):
-                                props = feature["properties"]
-                                if props.get("siteName") == beach_name or props.get("name") == beach_name:
-                                    return {
-                                        "forecast": props.get("pollutionForecast", "Unknown"),
-                                        "bacteria": props.get("latestResult"),
-                                        "stars": props.get("latestResultRating"),
-                                        "sample_date": props.get("latestResultObservationDate"),
-                                    }
+                        response.raise_for_status()
+                        data = await response.json()
+                        for feature in data.get("features", []):
+                            props = feature["properties"]
+                            if props.get("siteName") == beach_name or props.get("name") == beach_name:
+                                return {
+                                    "forecast": props.get("pollutionForecast", "Unknown"),
+                                    "bacteria": props.get("latestResult"),
+                                    "stars": props.get("latestResultRating"),
+                                    "sample_date": props.get("latestResultObservationDate"),
+                                }
+            except asyncio.TimeoutError:
+                _LOGGER.warning("Timeout fetching status for %s (Beachwatch API slow to respond)", beach_name)
+            except aiohttp.ClientError as err:
+                _LOGGER.warning("Connection error for %s: %s", beach_name, err)
             except Exception as err:
-                _LOGGER.error("Error fetching status for %s: %s", beach_name, err)
+                _LOGGER.error("Unexpected error for %s: %s", beach_name, err)
         return None
