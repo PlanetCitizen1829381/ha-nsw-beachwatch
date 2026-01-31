@@ -29,12 +29,12 @@ class NSWBeachwatchSensor(SensorEntity):
         self._attr_name = name_suffix
         self._attr_icon = icon
         self._attr_entity_category = category
-        self._attr_unique_id = f"bw_{key}_{beach_name.lower().replace(' ', '_')}"
+        self._attr_unique_id = f"nsw_beachwatch_{beach_name}_{key}".lower().replace(" ", "_")
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, beach_name)},
             name=beach_name,
             manufacturer="NSW Government",
-            model="Beachwatch Site",
+            model="Beachwatch Forecast",
             configuration_url="https://www.beachwatch.nsw.gov.au",
         )
         self._state = None
@@ -50,8 +50,12 @@ class NSWBeachwatchSensor(SensorEntity):
         return self._attrs
 
     async def async_update(self):
+        """Fetch new state data for the sensor."""
         data = await self._api.get_beach_status(self._beach_name)
-        if not data:
+        
+        
+        if data is None:
+            _LOGGER.debug("Skipping update for %s: API returned no data", self._beach_name)
             return
 
         forecast = str(data.get("forecast", "Unknown"))
@@ -74,4 +78,4 @@ class NSWBeachwatchSensor(SensorEntity):
             elif "likely" in forecast_lower:
                 self._state = "Water quality is unsuitable for swimming. Avoid swimming today."
             else:
-                self._state = "Check local signs before swimming."
+                self._state = "No current advice available."
