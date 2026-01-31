@@ -47,7 +47,7 @@ class NswBeachwatchOptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=vol.Schema({
                 vol.Optional(
                     "update_interval", 
-                    default=self.config_entry.options.get("update_interval", 30)
+                    default=self.config_entry.options.get("update_interval", 120)
                 ): vol.All(vol.Coerce(int), vol.Range(min=5, max=1440)),
             })
         )
