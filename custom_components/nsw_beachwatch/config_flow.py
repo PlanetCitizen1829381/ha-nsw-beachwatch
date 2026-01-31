@@ -27,7 +27,6 @@ class NswBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     SelectSelectorConfig(
                         options=beaches, 
                         mode=SelectSelectorMode.DROPDOWN, 
-                        custom_value=False,
                         sort=True
                     )
                 ),
