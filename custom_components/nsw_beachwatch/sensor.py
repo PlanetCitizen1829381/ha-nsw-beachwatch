@@ -12,21 +12,22 @@ async def async_setup_entry(hass, entry, async_add_entities):
     interval = entry.options.get("update_interval", 120)
     
     sensors = [
-        NSWBeachwatchSensor(api, beach_name, interval, "Water Pollution", "status"),
-        NSWBeachwatchSensor(api, beach_name, interval, "Advice", "advice"),
-        NSWBeachwatchSensor(api, beach_name, interval, "Bacteria Level", "bacteria", EntityCategory.DIAGNOSTIC),
-        NSWBeachwatchSensor(api, beach_name, interval, "Beach Grade", "stars", EntityCategory.DIAGNOSTIC)
+        NSWBeachwatchSensor(api, beach_name, interval, "Water Pollution", "status", "mdi:waves-arrow-up"),
+        NSWBeachwatchSensor(api, beach_name, interval, "Advice", "advice", "mdi:information-outline"),
+        NSWBeachwatchSensor(api, beach_name, interval, "Bacteria Level", "bacteria", "mdi:microscope", EntityCategory.DIAGNOSTIC),
+        NSWBeachwatchSensor(api, beach_name, interval, "Beach Grade", "stars", "mdi:star-circle", EntityCategory.DIAGNOSTIC)
     ]
     async_add_entities(sensors, True)
 
 class NSWBeachwatchSensor(SensorEntity):
     _attr_has_entity_name = True
 
-    def __init__(self, api, beach_name, interval, name_suffix, key, category=None):
+    def __init__(self, api, beach_name, interval, name_suffix, key, icon, category=None):
         self._api = api
         self._beach_name = beach_name
         self._key = key
         self._attr_name = name_suffix
+        self._attr_icon = icon
         self._attr_entity_category = category
         self._attr_unique_id = f"bw_{key}_{beach_name.lower().replace(' ', '_')}"
         self._attr_device_info = DeviceInfo(
