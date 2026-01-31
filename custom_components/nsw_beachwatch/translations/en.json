@@ -3,18 +3,24 @@
     "step": {
       "user": {
         "title": "Add NSW Beachwatch Site",
-        "description": "Find your beach below to monitor real-time water quality.",
+        "description": "Select a beach to monitor real-time water quality.",
         "data": {
           "beach_name": "Search for a beach..."
-        },
-        "data_description": {
-          "beach_name": "Click Beach Name to search"
         }
       }
     },
     "abort": {
       "already_configured": "This beach is already configured.",
       "cannot_connect": "Failed to connect to Beachwatch API."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "update_interval": "Update Interval (minutes)"
+        }
+      }
     }
   }
 }
