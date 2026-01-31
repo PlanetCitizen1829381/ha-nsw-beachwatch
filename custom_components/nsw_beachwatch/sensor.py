@@ -62,21 +62,18 @@ class NSWBeachwatchSensor(SensorEntity):
         now = datetime.now()
         today_0600 = now.replace(hour=6, minute=0, second=0, microsecond=0)
         today_1330 = now.replace(hour=13, minute=30, second=0, microsecond=0)
-
         if now < today_0600:
             return "Today at 6:00 AM"
         elif now < today_1330:
             return "Today at 1:30 PM"
-        else:
-            return "Tomorrow at 6:00 AM"
+        return "Tomorrow at 6:00 AM"
 
     async def async_update(self):
         data = await self._api.get_beach_status(self._beach_name)
         if not data: return
 
         self._attrs["last_sample_date"] = data.get("sample_date")
-        
-        if self._key == "status" or self._key == "advice":
+        if self._key in ["status", "advice"]:
             self._attrs["next_expected_forecast"] = self._get_next_forecast_time()
 
         if self._key == "status":
