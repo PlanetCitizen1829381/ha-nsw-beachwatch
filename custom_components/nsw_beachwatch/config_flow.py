@@ -20,6 +20,7 @@ class NswBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._abort_if_unique_id_configured()
             return self.async_create_entry(title=user_input["beach_name"], data=user_input)
 
+      
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema({
@@ -27,7 +28,6 @@ class NswBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     SelectSelectorConfig(
                         options=beaches, 
                         mode=SelectSelectorMode.DROPDOWN, 
-                        custom_value=False,
                         sort=True
                     )
                 ),
@@ -38,18 +38,3 @@ class NswBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry):
         return NswBeachwatchOptionsFlowHandler()
-
-class NswBeachwatchOptionsFlowHandler(config_entries.OptionsFlow):
-    async def async_step_init(self, user_input=None):
-        if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
-            
-        return self.async_show_form(
-            step_id="init",
-            data_schema=vol.Schema({
-                vol.Optional(
-                    "update_interval", 
-                    default=self.config_entry.options.get("update_interval", 30)
-                ): vol.All(vol.Coerce(int), vol.Range(min=5, max=1440)),
-            })
-        )
