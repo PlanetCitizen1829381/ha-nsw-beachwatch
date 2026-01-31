@@ -9,7 +9,7 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass, entry, async_add_entities):
     beach_name = entry.data.get("beach_name")
     api = hass.data[DOMAIN][entry.entry_id]
-    interval = entry.options.get("update_interval", 30)
+    interval = entry.options.get("update_interval", 120)
     
     sensors = [
         NSWBeachwatchSensor(api, beach_name, interval, "Water Pollution", "status"),
