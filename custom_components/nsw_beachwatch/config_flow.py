@@ -20,10 +20,12 @@ class NswBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._abort_if_unique_id_configured()
             return self.async_create_entry(title=user_input["beach_name"], data=user_input)
 
+        # We use a dictionary-based schema without vol.Required/Optional 
+        # to prevent the UI from auto-selecting the first item.
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema({
-                vol.Required("beach_name"): SelectSelector(
+                "beach_name": SelectSelector(
                     SelectSelectorConfig(
                         options=beaches, 
                         mode=SelectSelectorMode.DROPDOWN, 
