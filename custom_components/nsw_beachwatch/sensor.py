@@ -68,7 +68,7 @@ class NSWBeachwatchSensor(SensorEntity):
         elif self._key == "advice":
             forecast_lower = forecast.lower()
             if "unlikely" in forecast_lower:
-                self._state = "Water quality is suitable for swimming. Enjoy your swim!"
+                self._state = "Water quality is suitable for swimming. Enjoy a swim!"
             elif "possible" in forecast_lower:
                 self._state = "Caution advised for swimming. Children or elderly may be at risk."
             elif "likely" in forecast_lower:
