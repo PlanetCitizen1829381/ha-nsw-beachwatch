@@ -13,34 +13,41 @@ class NSWBeachwatchAPI:
         }
 
     async def get_all_beaches(self):
+        """Fetch all beaches for the config flow with a retry."""
         connector = aiohttp.TCPConnector(ssl=False)
         async with aiohttp.ClientSession(connector=connector, headers=self.headers) as session:
-            try:
-                async with asyncio.timeout(10):
-                    async with session.get(self.url) as response:
-                        response.raise_for_status()
-                        data = await response.json()
-                        beaches = []
-                        for feature in data.get("features", []):
-                            name = feature["properties"].get("siteName") or feature["properties"].get("name")
-                            if name: beaches.append(name)
-                        return sorted(list(set(beaches)))
-            except (aiohttp.ClientError, asyncio.TimeoutError) as err:
-                _LOGGER.warning("Network issue fetching beaches: %s", err)
-            except Exception as err:
-                _LOGGER.error("Unexpected error fetching beaches: %s", err)
+            for attempt in range(2):  # Try twice
+                try:
+                    async with asyncio.timeout(30):  
+                        async with session.get(self.url) as response:
+                            response.raise_for_status()
+                            data = await response.json()
+                            beaches = []
+                            for feature in data.get("features", []):
+                                props = feature.get("properties", {})
+                                name = props.get("siteName") or props.get("name")
+                                if name: beaches.append(name)
+                            if beaches:
+                                return sorted(list(set(beaches)))
+                except (aiohttp.ClientError, asyncio.TimeoutError) as err:
+                    _LOGGER.warning("Attempt %s failed to fetch beaches: %s", attempt + 1, err)
+                    if attempt == 0: await asyncio.sleep(2) 
+                except Exception as err:
+                    _LOGGER.error("Unexpected error fetching beaches: %s", err)
+                    break
         return []
 
     async def get_beach_status(self, beach_name):
+        """Fetch status for a specific beach."""
         connector = aiohttp.TCPConnector(ssl=False)
         async with aiohttp.ClientSession(connector=connector, headers=self.headers) as session:
             try:
-                async with asyncio.timeout(10):
+                async with asyncio.timeout(15):
                     async with session.get(self.url) as response:
                         response.raise_for_status()
                         data = await response.json()
                         for feature in data.get("features", []):
-                            props = feature["properties"]
+                            props = feature.get("properties", {})
                             if props.get("siteName") == beach_name or props.get("name") == beach_name:
                                 return {
                                     "forecast": props.get("pollutionForecast", "Unknown"),
@@ -49,7 +56,7 @@ class NSWBeachwatchAPI:
                                     "sample_date": props.get("latestResultObservationDate"),
                                 }
             except asyncio.TimeoutError:
-                _LOGGER.warning("Timeout fetching status for %s (Beachwatch API slow to respond)", beach_name)
+                _LOGGER.warning("Timeout fetching status for %s", beach_name)
             except aiohttp.ClientError as err:
                 _LOGGER.warning("Connection error for %s: %s", beach_name, err)
             except Exception as err:
