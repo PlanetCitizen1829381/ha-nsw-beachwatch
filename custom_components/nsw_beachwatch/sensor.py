@@ -108,7 +108,14 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
                 bacteria = data.get("bacteria")
                 attrs["enterococci_level"] = f"{bacteria} cfu/100mL" if bacteria else "N/A"
                 attrs["health_advice"] = get_microbial_meaning(stars)
-                attrs["last_sample_date"] = data.get("sample_date")
+                
+                raw_date = data.get("sample_date")
+                if raw_date and "T" in raw_date:
+                    attrs["last_sample_date"] = raw_date.split("T")[0]
+                elif raw_date and " " in raw_date:
+                    attrs["last_sample_date"] = raw_date.split(" ")[0]
+                else:
+                    attrs["last_sample_date"] = raw_date
 
             if self._key == "annual_grade":
                 grade = data.get("beach_grade")
