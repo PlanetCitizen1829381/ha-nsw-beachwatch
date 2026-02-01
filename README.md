@@ -74,11 +74,7 @@ The real-time predictive model provides the following states:
 
 ---
 
-## 🌐 Translations
-The integration uses a translation file to ensure all entities have human-readable names. You can find the latest version in `translations/en.json`. 
-
----
-
 <div align="center">
-  <sub>Data provided by <a href="https://www.beachwatch.nsw.gov.au">Beachwatch NSW</a>. Not officially affiliated with the NSW Government.</sub>
+  <sub>Data provided by <a href="https://www.beachwatch.nsw.gov.au">Beachwatch NSW</a>. This integration is not officially affiliated with the NSW Government.</sub>
 </div>
+
