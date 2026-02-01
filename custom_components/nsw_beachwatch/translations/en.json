@@ -42,6 +42,9 @@
           },
           "longitude": {
             "name": "Longitude"
+          },
+          "beach_details_url": {
+            "name": "Official Beach Report"
           }
         }
       },
@@ -62,6 +65,9 @@
           },
           "longitude": {
             "name": "Longitude"
+          },
+          "beach_details_url": {
+            "name": "Official Beach Report"
           }
         }
       },
@@ -76,8 +82,14 @@
           },
           "longitude": {
             "name": "Longitude"
+          },
+          "beach_details_url": {
+            "name": "Official Beach Report"
           }
         }
+      },
+      "water_quality_rating": {
+        "name": "Water Quality Rating"
       }
     },
     "binary_sensor": {
