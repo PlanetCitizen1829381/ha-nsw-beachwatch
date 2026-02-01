@@ -34,8 +34,11 @@
       "bacteria_level": {
         "name": "Bacteria Level"
       },
-      "beach_grade": {
-        "name": "Beach Grade"
+      "star_rating": {
+        "name": "Star Rating"
+      },
+      "annual_grade": {
+        "name": "Annual Beach Grade"
       }
     }
   }
