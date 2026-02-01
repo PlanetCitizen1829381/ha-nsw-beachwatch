@@ -56,6 +56,8 @@ class NSWBeachwatchAPI:
                                     "stars": props.get("latestResultRating"),
                                     "beach_grade": props.get("beachGrade"),
                                     "sample_date": props.get("latestResultObservationDate"),
+                                    "latitude": props.get("lat"),
+                                    "longitude": props.get("lon"),
                                 }
             except Exception:
                 return None
