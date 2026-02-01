@@ -26,16 +26,13 @@
   "entity": {
     "sensor": {
       "water_pollution": {
-        "name": "Water Pollution"
+        "name": "Pollution Forecast"
       },
       "advice": {
-        "name": "Advice"
+        "name": "Swimming Advice"
       },
-      "bacteria_level": {
-        "name": "Bacteria Level"
-      },
-      "star_rating": {
-        "name": "Star Rating"
+      "latest_water_quality": {
+        "name": "Latest Water Quality"
       },
       "annual_grade": {
         "name": "Annual Beach Grade"
