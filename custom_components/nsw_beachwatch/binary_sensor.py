@@ -22,6 +22,7 @@ class NSWBeachwatchBinarySensor(CoordinatorEntity, BinarySensorEntity):
             name=beach_name,
             manufacturer=MANUFACTURER,
         )
+        self._sort_order = 2
 
     @property
     def is_on(self):
