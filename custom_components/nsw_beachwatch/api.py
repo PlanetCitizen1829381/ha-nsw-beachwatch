@@ -32,7 +32,7 @@ class NSWBeachwatchAPI:
                                     beaches.append(name)
                             return sorted(list(set(beaches)))
                 except Exception:
-                    if attempt == 1: return []
+                    continue
         return []
 
     async def get_beach_status(self, beach_name):
