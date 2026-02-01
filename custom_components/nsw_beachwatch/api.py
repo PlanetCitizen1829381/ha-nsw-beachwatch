@@ -54,6 +54,7 @@ class NSWBeachwatchAPI:
                                     "forecast": props.get("pollutionForecast", "Unknown"),
                                     "bacteria": props.get("latestResult"),
                                     "stars": props.get("latestResultRating"),
+                                    "beach_grade": props.get("beachGrade"),
                                     "sample_date": props.get("latestResultObservationDate"),
                                 }
             except Exception:
