@@ -95,13 +95,12 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
         attrs = {}
         data = self.coordinator.data
         if data:
-            attrs["last_updated"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
             if self._key == "advice":
                 forecast = str(data.get("forecast", "Unknown")).lower()
                 advice_info = ADVICE_MAP.get(forecast, {})
                 attrs["risk_level"] = advice_info.get("risk", "Unknown")
                 attrs["risk_meaning"] = advice_info.get("details", "Check for signs of pollution before swimming.")
+                attrs["last_official_update"] = data.get("forecast_date", "Unknown")
 
             if self._key == "latest_results":
                 stars = data.get("stars")
