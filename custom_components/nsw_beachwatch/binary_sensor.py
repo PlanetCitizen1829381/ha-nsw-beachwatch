@@ -1,4 +1,4 @@
-from homeassistant.components.binary_sensor import BinarySensorEntity
+from homeassistant.components.binary_sensor import BinarySensorEntity, BinarySensorDeviceClass
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.entity import DeviceInfo
 from .const import DOMAIN, MANUFACTURER
@@ -11,7 +11,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 class NSWBeachwatchBinarySensor(CoordinatorEntity, BinarySensorEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "swimming_safety"
-    _attr_icon = "mdi:check-circle-outline"
+    _attr_device_class = BinarySensorDeviceClass.SAFETY
 
     def __init__(self, coordinator, beach_name):
         super().__init__(coordinator)
@@ -22,6 +22,10 @@ class NSWBeachwatchBinarySensor(CoordinatorEntity, BinarySensorEntity):
             name=beach_name,
             manufacturer=MANUFACTURER,
         )
+
+    @property
+    def icon(self):
+        return "mdi:check-circle-outline"
 
     @property
     def is_on(self):
