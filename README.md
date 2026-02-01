@@ -14,9 +14,10 @@
 ## ✨ Features
 * **Pollution Sensor:** Direct forecast states (Unlikely, Possible, or Likely).
 * **Smart Advice:** Simplified swimming recommendations based on current water quality.
+* **Annual Beach Grade:** Long-term suitability assessments with descriptive meanings.
 * **Diagnostic Data:** Tracking of bacteria counts (Enterococci) and Star Ratings.
 * **Device-Centric:** All sensors grouped under a single Beach device for a clean UI.
-* **Configurable Polling:** Control how often the API is checked to suit your needs.
+* **Configurable Polling:** Control how often the API is checked via integration options.
 
 ---
 
@@ -24,64 +25,61 @@
 
 ### Option 1: HACS (Recommended)
 1. Ensure [HACS](https://hacs.xyz/) is installed.
-2. Click the **Open in HACS** button above, or manually add this URL as a **Custom Repository**:
-   `https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch`
-3. Download and restart Home Assistant.
+2. Click the **My Home Assistant** badge above or go to HACS > Integrations > Explore.
+3. Search for `NSW Beachwatch` and install.
+4. Restart Home Assistant.
 
 ### Option 2: Manual
-1. Download the `custom_components/nsw_beachwatch` folder.
-2. Paste it into your Home Assistant `/config/custom_components/` directory.
+1. Download the `nsw_beachwatch` folder from `custom_components`.
+2. Copy it into your Home Assistant `config/custom_components/` directory.
 3. Restart Home Assistant.
 
 ---
 
 ## ⚙️ Configuration
 1. Go to **Settings** > **Devices & Services**.
-2. Click **+ Add Integration** and search for **NSW Beachwatch**.
-3. Select your beach from the searchable dropdown list.
-4. Use the **Configure** button on the device page to adjust the update interval (default is **120 minutes**).
+2. Click **Add Integration** and search for **NSW Beachwatch**.
+3. Select your beach from the dropdown list.
+4. (Optional) Adjust the **Update Interval** (default is 120 minutes) by clicking **Configure** on the integration card.
 
 ---
 
 ## 📊 Entities
-| Icon | Entity Name | Category | Description |
-| :---: | :--- | :---: | :--- |
-| 🌊 | **Water Pollution** | Primary | Forecast state using `mdi:waves-arrow-up`. |
-| ℹ️ | **Advice** | Primary | Swimming recommendation using `mdi:information-outline`. |
-| 🔬 | **Bacteria Level** | Diagnostic | Lab results using `mdi:microscope`. |
-| ⭐ | **Beach Grade** | Diagnostic | Star rating using `mdi:star-circle`. |
+Each beach added creates a device with the following sensors:
+
+| Entity Name | Icon | Type | Description |
+| :--- | :--- | :--- | :--- |
+| **Water Pollution** | `mdi:waves-arrow-up` | State | The current pollution forecast (e.g., Unlikely, Possible). |
+| **Advice** | `mdi:information-outline` | State | A simple recommendation (e.g., "Suitable for swimming"). |
+| **Annual Beach Grade**| `mdi:star` | Diagnostic | Long-term grade (e.g., "Very Good"). Includes a `meaning` attribute. |
+| **Star Rating** | `mdi:star-circle` | Diagnostic | Short-term rating (1–4 stars) based on the latest sample. |
+| **Bacteria Level** | `mdi:microscope` | Diagnostic | The physical count of Enterococci per 100mL. |
+
+### 💡 Smart Advice Logic
+The **Advice** sensor interprets the raw forecast to give you peace of mind:
+* **Unlikely:** "Water quality is suitable for swimming. Enjoy a swim!"
+* **Possible:** "Caution advised for swimming. Children or elderly may be at risk."
+* **Likely:** "Water quality is unsuitable for swimming. Avoid swimming today."
+
+
 
 ---
 
-## 🕒 Data Refresh Rates
-The integration checks the NSW Beachwatch API every **2 hours** by default. However, the underlying data is updated by the NSW Government at different frequencies:
+## ⏱️ Data Refresh Rates
+The integration polls the Beachwatch API every **2 hours** by default. However, the underlying data is updated by the NSW Government at different frequencies:
 
 | Data Type | Update Frequency (Source) | Details |
 | :--- | :--- | :--- |
 | **Pollution Forecast** | **Twice Daily** | Usually updated at **6:00 AM** and **1:30 PM**. |
 | **Bacteria Level** | **Weekly** | Water samples are typically collected every 6 days. |
-| **Star Rating** | **Weekly** | Calculated and updated as soon as new laboratory results are available. |
-| **Beach Grade** | **Annually** | Long-term assessment published in the yearly *State of the Beaches* report. |
+| **Star Rating** | **Weekly** | Updated as new laboratory results are available. |
+| **Annual Grade** | **Annually** | Published in the yearly *State of the Beaches* report (October). |
 
-> **Tip:** You can see the exact date of the latest water sample by checking the `last_sample_date` attribute on any of the beach sensors.
+> **Tip:** You can see the exact date of the latest physical water sample by checking the `last_sample_date` attribute on any of the beach sensors.
 
 ---
 
 <div align="center">
   <sub>Data provided by <a href="https://www.beachwatch.nsw.gov.au">Beachwatch NSW</a>. This integration is not officially affiliated with the NSW Government.</sub>
 </div>
-
-## Next steps
-
-These are some next steps you may want to look into:
-- Add tests to your integration, [`pytest-homeassistant-custom-component`](https://github.com/MatthewFlamm/pytest-homeassistant-custom-component) can help you get started.
-- Add brand images (logo/icon) to https://github.com/home-assistant/brands.
-- Create your first release.
-- Share your integration on the [Home Assistant Forum](https://community.home-assistant.io/).
-- Submit your integration to [HACS](https://hacs.xyz/docs/publish/start).
-
-
-
-
-
 
