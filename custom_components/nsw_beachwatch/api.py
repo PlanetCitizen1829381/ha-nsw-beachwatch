@@ -22,7 +22,6 @@ class NSWBeachwatchAPI:
                             if response.status == 429:
                                 await asyncio.sleep(5)
                                 continue
-                            
                             response.raise_for_status()
                             data = await response.json()
                             beaches = []
@@ -33,7 +32,7 @@ class NSWBeachwatchAPI:
                                     beaches.append(name)
                             return sorted(list(set(beaches)))
                 except Exception:
-                    continue
+                    if attempt == 1: return []
         return []
 
     async def get_beach_status(self, beach_name):
@@ -44,7 +43,6 @@ class NSWBeachwatchAPI:
                     async with session.get(self.url) as response:
                         if response.status == 429:
                             return None
-                            
                         response.raise_for_status()
                         data = await response.json()
                         for feature in data.get("features", []):
