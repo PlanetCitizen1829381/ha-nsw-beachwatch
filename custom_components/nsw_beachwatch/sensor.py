@@ -1,5 +1,5 @@
 import logging
-import datetime
+from datetime import datetime
 from homeassistant.components.sensor import SensorEntity, EntityCategory
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.entity import DeviceInfo
@@ -16,22 +16,21 @@ GRADE_MEANINGS = {
     "Follow Up": "Used when the sanitary inspection and water data don't match, requiring further assessment."
 }
 
-POLLUTION_MAPPING = {
-    "Pollution unlikely": {
-        "meaning": "Water quality is predicted to be suitable for swimming.",
-        "action": "Enjoy your swim."
+ADVICE_MAP = {
+    "unlikely": {
+        "state": "Water quality is suitable for swimming. Enjoy a swim!",
+        "risk": "Pollution Unlikely",
+        "details": "Microbial levels are expected to be within safe guidelines. No significant pollution predicted."
     },
-    "Pollution possible": {
-        "meaning": "Caution advised; water quality is usually suitable, but high-risk groups (children, elderly) should be careful.",
-        "action": "Consider delaying your swim."
+    "possible": {
+        "state": "Caution advised for swimming. Children or elderly may be at risk.",
+        "risk": "Pollution Possible",
+        "details": "Recent rainfall or events may have caused temporary elevation in bacteria. Water quality is usually suitable, but vulnerable groups should take care."
     },
-    "Pollution likely": {
-        "meaning": "Water quality is predicted to be unsuitable for swimming.",
-        "action": "Avoid swimming."
-    },
-    "Forecast unavailable": {
-        "meaning": "No daily forecast is available for this specific site.",
-        "action": "Check for signs of pollution manually."
+    "likely": {
+        "state": "Water quality is unsuitable for swimming. Avoid swimming today.",
+        "risk": "Pollution Likely",
+        "details": "High probability of faecal contamination and illness transmission. Significant risk of illness."
     }
 }
 
@@ -49,8 +48,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
     beach_name = entry.data.get("beach_name")
     
     sensors = [
-        NSWBeachwatchSensor(coordinator, beach_name, "pollution_forecast", "pollutionForecast", "mdi:chart-bell-curve"),
-        NSWBeachwatchSensor(coordinator, beach_name, "water_pollution", "status", "mdi:waves-arrow-up"),
         NSWBeachwatchSensor(coordinator, beach_name, "advice", "advice", "mdi:information-outline"),
         NSWBeachwatchSensor(coordinator, beach_name, "latest_water_quality", "latest_results", "mdi:star-check", EntityCategory.DIAGNOSTIC),
         NSWBeachwatchSensor(coordinator, beach_name, "annual_grade", "annual_grade", "mdi:star", EntityCategory.DIAGNOSTIC)
@@ -80,12 +77,10 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
         if not data:
             return None
 
-        if self._key == "pollutionForecast":
-            return data.get("pollutionForecast", "Forecast unavailable")
+        if self._key == "advice":
+            forecast = str(data.get("forecast", "Unknown")).lower()
+            return ADVICE_MAP.get(forecast, {}).get("state", "No forecast available.")
 
-        if self._key == "status":
-            return str(data.get("forecast", "Unknown"))
-        
         if self._key == "latest_results":
             stars = data.get("stars")
             return f"{stars} Stars" if stars else "N/A"
@@ -93,41 +88,30 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
         if self._key == "annual_grade":
             return data.get("beach_grade", "N/A")
             
-        if self._key == "advice":
-            forecast = str(data.get("forecast", "Unknown")).lower()
-            if "unlikely" in forecast:
-                return "Water quality is suitable for swimming. Enjoy a swim!"
-            elif "possible" in forecast:
-                return "Caution advised for swimming. Children or elderly may be at risk."
-            elif "likely" in forecast:
-                return "Water quality is unsuitable for swimming. Avoid swimming today."
-            return "No forecast available."
-            
         return None
 
     @property
     def extra_state_attributes(self):
         attrs = {}
         data = self.coordinator.data
-        if not data:
-            return attrs
+        if data:
+            attrs["last_updated"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        if self._key == "pollutionForecast":
-            val = self.state
-            details = POLLUTION_MAPPING.get(val, POLLUTION_MAPPING["Forecast unavailable"])
-            attrs["meaning"] = details["meaning"]
-            attrs["recommended_action"] = details["action"]
-            attrs["last_updated"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            if self._key == "advice":
+                forecast = str(data.get("forecast", "Unknown")).lower()
+                advice_info = ADVICE_MAP.get(forecast, {})
+                attrs["risk_level"] = advice_info.get("risk", "Unknown")
+                attrs["risk_meaning"] = advice_info.get("details", "Check for signs of pollution before swimming.")
 
-        if self._key == "annual_grade":
-            grade = data.get("beach_grade")
-            attrs["meaning"] = GRADE_MEANINGS.get(grade, "No description available.")
-        
-        if self._key == "latest_results":
-            stars = data.get("stars")
-            bacteria = data.get("bacteria")
-            attrs["enterococci_level"] = f"{bacteria} cfu/100mL" if bacteria else "N/A"
-            attrs["health_advice"] = get_microbial_meaning(stars)
-            attrs["last_sample_date"] = data.get("sample_date")
+            if self._key == "latest_results":
+                stars = data.get("stars")
+                bacteria = data.get("bacteria")
+                attrs["enterococci_level"] = f"{bacteria} cfu/100mL" if bacteria else "N/A"
+                attrs["health_advice"] = get_microbial_meaning(stars)
+                attrs["last_sample_date"] = data.get("sample_date")
+
+            if self._key == "annual_grade":
+                grade = data.get("beach_grade")
+                attrs["meaning"] = GRADE_MEANINGS.get(grade, "No description available.")
                 
         return attrs
