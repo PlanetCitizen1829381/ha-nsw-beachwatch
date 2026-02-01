@@ -1,16 +1,40 @@
+from datetime import timedelta
+import logging
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+
 from .api import NSWBeachwatchAPI
 from .const import DOMAIN
+
+_LOGGER = logging.getLogger(__name__)
 
 PLATFORMS = ["sensor"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     api = NSWBeachwatchAPI()
-    
+    beach_name = entry.data.get("beach_name")
+    update_interval = entry.options.get("update_interval", 120)
+
+    async def async_update_data():
+        data = await api.get_beach_status(beach_name)
+        if data is None:
+            raise UpdateFailed(f"Error communicating with API for {beach_name}")
+        return data
+
+    coordinator = DataUpdateCoordinator(
+        hass,
+        _LOGGER,
+        name=f"Beachwatch {beach_name}",
+        update_method=async_update_data,
+        update_interval=timedelta(minutes=update_interval),
+    )
+
+    await coordinator.async_config_entry_first_refresh()
+
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = api
-    
+    hass.data[DOMAIN][entry.entry_id] = coordinator
+
     entry.async_on_unload(entry.add_update_listener(update_listener))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
