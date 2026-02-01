@@ -15,6 +15,15 @@ GRADE_MEANINGS = {
     "Follow Up": "Used when the sanitary inspection and water data don't match, requiring further assessment."
 }
 
+def get_microbial_meaning(stars):
+    mapping = {
+        4: "Good: Bacterial levels are safe for bathing.",
+        3: "Fair: Bacterial levels indicate an increased risk of illness.",
+        2: "Poor: Bacterial levels indicate a substantially increased risk of illness.",
+        1: "Bad: Bacterial levels indicate a significant risk of illness."
+    }
+    return mapping.get(stars, "No assessment available.")
+
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
     beach_name = entry.data.get("beach_name")
@@ -82,8 +91,10 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
                 attrs["meaning"] = GRADE_MEANINGS.get(grade, "No description available.")
             
             if self._key == "latest_results":
+                stars = data.get("stars")
                 bacteria = data.get("bacteria")
                 attrs["enterococci_level"] = f"{bacteria} cfu/100mL" if bacteria else "N/A"
+                attrs["health_advice"] = get_microbial_meaning(stars)
                 attrs["last_sample_date"] = data.get("sample_date")
                 
         return attrs
