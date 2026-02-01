@@ -38,17 +38,17 @@ async def async_setup_entry(hass, entry, async_add_entities):
     beach_name = entry.data.get("beach_name")
     
     sensors = [
-        NSWBeachwatchSensor(coordinator, beach_name, "advice", "mdi:swim"),
-        NSWBeachwatchSensor(coordinator, beach_name, "latest_results", "mdi:microscope"),
-        NSWBeachwatchSensor(coordinator, beach_name, "water_quality_rating", "mdi:chart-line"),
-        NSWBeachwatchSensor(coordinator, beach_name, "annual_grade", "mdi:star"),
+        NSWBeachwatchSensor(coordinator, beach_name, "advice", "mdi:swim", 1),
+        NSWBeachwatchSensor(coordinator, beach_name, "latest_results", "mdi:microscope", 3),
+        NSWBeachwatchSensor(coordinator, beach_name, "water_quality_rating", "mdi:chart-line", 4),
+        NSWBeachwatchSensor(coordinator, beach_name, "annual_grade", "mdi:star", 5),
     ]
     async_add_entities(sensors)
 
 class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
     _attr_has_entity_name = True
 
-    def __init__(self, coordinator, beach_name, key, icon):
+    def __init__(self, coordinator, beach_name, key, icon, sort_order):
         super().__init__(coordinator)
         self._beach_name = beach_name
         self._key = key
@@ -60,6 +60,7 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
             name=beach_name,
             manufacturer=MANUFACTURER,
         )
+        self._sort_order = sort_order
         if key == "water_quality_rating":
             self._attr_state_class = SensorStateClass.MEASUREMENT
 
