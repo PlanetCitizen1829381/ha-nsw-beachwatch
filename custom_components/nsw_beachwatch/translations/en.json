@@ -26,13 +26,40 @@
   "entity": {
     "sensor": {
       "advice": {
-        "name": "Swimming Advice"
+        "name": "Swimming Advice",
+        "state_attributes": {
+          "risk_level": {
+            "name": "Risk Level"
+          },
+          "risk_meaning": {
+            "name": "Risk Meaning"
+          },
+          "last_official_update": {
+            "name": "Last Official Update"
+          }
+        }
       },
       "latest_water_quality": {
-        "name": "Latest Water Quality"
+        "name": "Latest Water Quality",
+        "state_attributes": {
+          "enterococci_level": {
+            "name": "Enterococci Level"
+          },
+          "health_advice": {
+            "name": "Health Advice"
+          },
+          "last_sample_date": {
+            "name": "Last Sample Date"
+          }
+        }
       },
       "annual_grade": {
-        "name": "Annual Beach Grade"
+        "name": "Annual Beach Grade",
+        "state_attributes": {
+          "meaning": {
+            "name": "Meaning"
+          }
+        }
       }
     }
   }
