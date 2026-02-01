@@ -1,4 +1,5 @@
 import logging
+import datetime
 from homeassistant.components.sensor import SensorEntity, EntityCategory
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.entity import DeviceInfo
@@ -15,6 +16,25 @@ GRADE_MEANINGS = {
     "Follow Up": "Used when the sanitary inspection and water data don't match, requiring further assessment."
 }
 
+POLLUTION_MAPPING = {
+    "Pollution unlikely": {
+        "meaning": "Water quality is predicted to be suitable for swimming.",
+        "action": "Enjoy your swim."
+    },
+    "Pollution possible": {
+        "meaning": "Caution advised; water quality is usually suitable, but high-risk groups (children, elderly) should be careful.",
+        "action": "Consider delaying your swim."
+    },
+    "Pollution likely": {
+        "meaning": "Water quality is predicted to be unsuitable for swimming.",
+        "action": "Avoid swimming."
+    },
+    "Forecast unavailable": {
+        "meaning": "No daily forecast is available for this specific site.",
+        "action": "Check for signs of pollution manually."
+    }
+}
+
 def get_microbial_meaning(stars):
     mapping = {
         4: "Good: Bacterial levels are safe for bathing.",
@@ -29,6 +49,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     beach_name = entry.data.get("beach_name")
     
     sensors = [
+        NSWBeachwatchSensor(coordinator, beach_name, "pollution_forecast", "pollutionForecast", "mdi:chart-bell-curve"),
         NSWBeachwatchSensor(coordinator, beach_name, "water_pollution", "status", "mdi:waves-arrow-up"),
         NSWBeachwatchSensor(coordinator, beach_name, "advice", "advice", "mdi:information-outline"),
         NSWBeachwatchSensor(coordinator, beach_name, "latest_water_quality", "latest_results", "mdi:star-check", EntityCategory.DIAGNOSTIC),
@@ -59,6 +80,9 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
         if not data:
             return None
 
+        if self._key == "pollutionForecast":
+            return data.get("pollutionForecast", "Forecast unavailable")
+
         if self._key == "status":
             return str(data.get("forecast", "Unknown"))
         
@@ -85,16 +109,25 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
     def extra_state_attributes(self):
         attrs = {}
         data = self.coordinator.data
-        if data:
-            if self._key == "annual_grade":
-                grade = data.get("beach_grade")
-                attrs["meaning"] = GRADE_MEANINGS.get(grade, "No description available.")
-            
-            if self._key == "latest_results":
-                stars = data.get("stars")
-                bacteria = data.get("bacteria")
-                attrs["enterococci_level"] = f"{bacteria} cfu/100mL" if bacteria else "N/A"
-                attrs["health_advice"] = get_microbial_meaning(stars)
-                attrs["last_sample_date"] = data.get("sample_date")
+        if not data:
+            return attrs
+
+        if self._key == "pollutionForecast":
+            val = self.state
+            details = POLLUTION_MAPPING.get(val, POLLUTION_MAPPING["Forecast unavailable"])
+            attrs["meaning"] = details["meaning"]
+            attrs["recommended_action"] = details["action"]
+            attrs["last_updated"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        if self._key == "annual_grade":
+            grade = data.get("beach_grade")
+            attrs["meaning"] = GRADE_MEANINGS.get(grade, "No description available.")
+        
+        if self._key == "latest_results":
+            stars = data.get("stars")
+            bacteria = data.get("bacteria")
+            attrs["enterococci_level"] = f"{bacteria} cfu/100mL" if bacteria else "N/A"
+            attrs["health_advice"] = get_microbial_meaning(stars)
+            attrs["last_sample_date"] = data.get("sample_date")
                 
         return attrs
