@@ -22,8 +22,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     sensors = [
         NSWBeachwatchSensor(coordinator, beach_name, "water_pollution", "status", "mdi:waves-arrow-up"),
         NSWBeachwatchSensor(coordinator, beach_name, "advice", "advice", "mdi:information-outline"),
-        NSWBeachwatchSensor(coordinator, beach_name, "bacteria_level", "bacteria", "mdi:microscope", EntityCategory.DIAGNOSTIC),
-        NSWBeachwatchSensor(coordinator, beach_name, "star_rating", "stars", "mdi:star-circle", EntityCategory.DIAGNOSTIC),
+        NSWBeachwatchSensor(coordinator, beach_name, "latest_water_quality", "latest_results", "mdi:star-check", EntityCategory.DIAGNOSTIC),
         NSWBeachwatchSensor(coordinator, beach_name, "annual_grade", "annual_grade", "mdi:star", EntityCategory.DIAGNOSTIC)
     ]
     async_add_entities(sensors)
@@ -54,13 +53,9 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
         if self._key == "status":
             return str(data.get("forecast", "Unknown"))
         
-        if self._key == "bacteria":
-            val = data.get("bacteria")
-            return f"{val} cfu/100mL" if val else "N/A"
-            
-        if self._key == "stars":
-            val = data.get("stars")
-            return f"{val} Stars" if val else "N/A"
+        if self._key == "latest_results":
+            stars = data.get("stars")
+            return f"{stars} Stars" if stars else "N/A"
 
         if self._key == "annual_grade":
             return data.get("beach_grade", "N/A")
@@ -80,11 +75,15 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
     @property
     def extra_state_attributes(self):
         attrs = {}
-        if self.coordinator.data:
-            attrs["last_sample_date"] = self.coordinator.data.get("sample_date")
-            
+        data = self.coordinator.data
+        if data:
             if self._key == "annual_grade":
-                grade = self.coordinator.data.get("beach_grade")
+                grade = data.get("beach_grade")
                 attrs["meaning"] = GRADE_MEANINGS.get(grade, "No description available.")
+            
+            if self._key == "latest_results":
+                bacteria = data.get("bacteria")
+                attrs["enterococci_level"] = f"{bacteria} cfu/100mL" if bacteria else "N/A"
+                attrs["last_sample_date"] = data.get("sample_date")
                 
         return attrs
