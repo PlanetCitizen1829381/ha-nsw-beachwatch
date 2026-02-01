@@ -4,7 +4,9 @@
       "user": {
         "title": "Add NSW Beachwatch Site",
         "description": "Select a beach to monitor real-time water quality.",
-        "data": { "beach_name": "Search for a beach..." }
+        "data": {
+          "beach_name": "Search for a beach..."
+        }
       }
     },
     "abort": {
@@ -12,25 +14,52 @@
       "cannot_connect": "Failed to connect to Beachwatch API."
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "update_interval": "Update Interval (minutes)"
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "advice": {
         "name": "Swimming Advice",
         "state_attributes": {
-          "risk_level": { "name": "Risk Level" },
-          "risk_meaning": { "name": "Risk Meaning" },
-          "last_official_update": { "name": "Last Official Update" },
-          "latitude": { "name": "Latitude" },
-          "longitude": { "name": "Longitude" }
+          "risk_level": {
+            "name": "Risk Level"
+          },
+          "risk_meaning": {
+            "name": "Risk Meaning"
+          },
+          "last_official_update": {
+            "name": "Last Official Update"
+          },
+          "latitude": {
+            "name": "Latitude"
+          },
+          "longitude": {
+            "name": "Longitude"
+          }
         }
       },
       "latest_results": {
         "name": "Water Quality Test",
         "state_attributes": {
-          "enterococci_level": { "name": "Enterococci Level" },
-          "last_sample_date": { "name": "Last Sample Date" },
-          "latitude": { "name": "Latitude" },
-          "longitude": { "name": "Longitude" }
+          "enterococci_level": {
+            "name": "Enterococci Level"
+          },
+          "last_sample_date": {
+            "name": "Last Sample Date"
+          },
+          "latitude": {
+            "name": "Latitude"
+          },
+          "longitude": {
+            "name": "Longitude"
+          }
         }
       },
       "water_quality_rating": {
@@ -39,9 +68,15 @@
       "annual_grade": {
         "name": "Annual Beach Grade",
         "state_attributes": {
-          "meaning": { "name": "Meaning" },
-          "latitude": { "name": "Latitude" },
-          "longitude": { "name": "Longitude" }
+          "meaning": {
+            "name": "Meaning"
+          },
+          "latitude": {
+            "name": "Latitude"
+          },
+          "longitude": {
+            "name": "Longitude"
+          }
         }
       }
     },
