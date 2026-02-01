@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from homeassistant.components.sensor import SensorEntity, EntityCategory
+from homeassistant.components.sensor import SensorEntity, SensorStateClass
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.entity import DeviceInfo
 from .const import DOMAIN, MANUFACTURER
@@ -53,6 +53,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         NSWBeachwatchSensor(coordinator, beach_name, "advice"),
         NSWBeachwatchSensor(coordinator, beach_name, "latest_results"),
         NSWBeachwatchSensor(coordinator, beach_name, "annual_grade"),
+        NSWBeachwatchSensor(coordinator, beach_name, "water_quality_rating"),
     ]
     async_add_entities(sensors)
 
@@ -71,6 +72,10 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
             manufacturer=MANUFACTURER,
         )
 
+        if key == "water_quality_rating":
+            self._attr_state_class = SensorStateClass.MEASUREMENT
+            self._attr_native_unit_of_measurement = "Stars"
+
     @property
     def state(self):
         data = self.coordinator.data
@@ -87,6 +92,12 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
 
         if self._key == "annual_grade":
             return data.get("beach_grade", "Not Rated")
+
+        if self._key == "water_quality_rating":
+            try:
+                return int(data.get("stars", 0))
+            except (ValueError, TypeError):
+                return 0
             
         return None
 
@@ -97,6 +108,10 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
         if data:
             attrs["latitude"] = data.get("latitude")
             attrs["longitude"] = data.get("longitude")
+            
+            beach_id = data.get("id")
+            if beach_id:
+                attrs["beach_details_url"] = f"https://www.beachwatch.nsw.gov.au/beachwatchPartners/{beach_id}"
 
             if self._key == "advice":
                 forecast = str(data.get("forecast", "Unknown")).lower()
