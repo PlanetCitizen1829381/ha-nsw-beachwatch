@@ -4,7 +4,7 @@
 **Water pollution monitoring and swimming safety for New South Wales beaches.**
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge)](https://hacs.xyz/)
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg?style=for-the-badge)]
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg?style=for-the-badge)](https://my.home-assistant.io/redirect/hacs_repository/?owner=PlanetCitizen1829381&repository=ha-nsw-beachwatch&category=integration)
 
 [Features](#-features) • [Installation](#-installation) • [Configuration](#-configuration) • [Entities](#-entities) • [Data Refresh Rates](#-data-refresh-rates)
 
@@ -24,9 +24,8 @@
 
 ### Option 1: HACS (Recommended)
 1. Ensure [HACS](https://hacs.xyz/) is installed.
-2. Click (https://my.home-assistant.io/redirect/hacs_repository/?owner=PlanetCitizen1829381&repository=ha-nsw-beachwatch&category=integration)
-3. Search for `NSW Beachwatch` and install.
-4. Restart Home Assistant.
+2. Search for `NSW Beachwatch` and install.
+3. Restart Home Assistant.
 
 ---
 
@@ -78,5 +77,6 @@ The real-time predictive model provides the following states:
 <div align="center">
   <sub>Data provided by <a href="https://www.beachwatch.nsw.gov.au">Beachwatch NSW</a>. This integration is not officially affiliated with the NSW Government.</sub>
 </div>
+
 
 
