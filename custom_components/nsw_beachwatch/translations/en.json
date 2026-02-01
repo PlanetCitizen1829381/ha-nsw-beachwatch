@@ -2,30 +2,29 @@
   "config": {
     "step": {
       "user": {
+        "title": "Add NSW Beachwatch Site",
+        "description": "Select a beach to monitor real-time water quality.",
         "data": {
-          "beach_id": "Beach Site ID",
-          "beach_name": "Beach Name"
-        },
-        "description": "Enter the Site ID and Name for the NSW Beachwatch location."
+          "beach_name": "Search for a beach..."
+        }
       }
     },
-    "error": {
-      "cannot_connect": "Failed to connect to Beachwatch API",
-      "invalid_auth": "Invalid authentication",
-      "unknown": "Unexpected error"
-    },
     "abort": {
-      "already_configured": "This beach is already configured."
+      "already_configured": "This beach is already configured.",
+      "cannot_connect": "Failed to connect to Beachwatch API."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "update_interval": "Update Interval (minutes)"
+        }
+      }
     }
   },
   "entity": {
     "sensor": {
-      "pollution_forecast": {
-        "name": "Pollution Forecast"
-      },
-      "water_pollution": {
-        "name": "Water Pollution Status"
-      },
       "advice": {
         "name": "Swimming Advice"
       },
