@@ -22,6 +22,7 @@ class NSWBeachwatchAPI:
                             if response.status == 429:
                                 await asyncio.sleep(5)
                                 continue
+                            
                             response.raise_for_status()
                             data = await response.json()
                             beaches = []
@@ -43,12 +44,11 @@ class NSWBeachwatchAPI:
                     async with session.get(self.url) as response:
                         if response.status == 429:
                             return None
+                            
                         response.raise_for_status()
                         data = await response.json()
                         for feature in data.get("features", []):
                             props = feature.get("properties", {})
-                            geom = feature.get("geometry", {})
-                            coords = geom.get("coordinates", [None, None])
                             if props.get("siteName") == beach_name or props.get("name") == beach_name:
                                 return {
                                     "id": props.get("id"),
@@ -58,8 +58,8 @@ class NSWBeachwatchAPI:
                                     "stars": props.get("latestResultRating"),
                                     "beach_grade": props.get("beachGrade"),
                                     "sample_date": props.get("latestResultObservationDate"),
-                                    "longitude": coords[0],
-                                    "latitude": coords[1],
+                                    "latitude": props.get("lat"),
+                                    "longitude": props.get("lon"),
                                 }
             except Exception:
                 return None
