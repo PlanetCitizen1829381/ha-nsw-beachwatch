@@ -1,7 +1,9 @@
 <div align="center">
 
-# 🌊 NSW Beachwatch for Home Assistant 🌊
-**Stop guessing. Start swimming!** Bring real-time water quality forecasts and official safety advice for your favorite New South Wales beaches directly into your smart home dashboard.
+<img src="custom_components/nsw_beachwatch/logo%402x.png" width="400" alt="NSW Beachwatch Logo">
+
+# Built to work in Home Assistant
+**Know before you go!** Bring real-time water quality forecasts and official safety advice for your favorite New South Wales beaches directly into your smart home dashboard.
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge)](https://hacs.xyz/)
 
