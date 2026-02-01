@@ -11,21 +11,21 @@ async def async_setup_entry(hass, entry, async_add_entities):
     beach_name = entry.data.get("beach_name")
     
     sensors = [
-        NSWBeachwatchSensor(coordinator, beach_name, "Water Pollution", "status", "mdi:waves-arrow-up"),
-        NSWBeachwatchSensor(coordinator, beach_name, "Advice", "advice", "mdi:information-outline"),
-        NSWBeachwatchSensor(coordinator, beach_name, "Bacteria Level", "bacteria", "mdi:microscope", EntityCategory.DIAGNOSTIC),
-        NSWBeachwatchSensor(coordinator, beach_name, "Beach Grade", "stars", "mdi:star-circle", EntityCategory.DIAGNOSTIC)
+        NSWBeachwatchSensor(coordinator, beach_name, "water_pollution", "status", "mdi:waves-arrow-up"),
+        NSWBeachwatchSensor(coordinator, beach_name, "advice", "advice", "mdi:information-outline"),
+        NSWBeachwatchSensor(coordinator, beach_name, "bacteria_level", "bacteria", "mdi:microscope", EntityCategory.DIAGNOSTIC),
+        NSWBeachwatchSensor(coordinator, beach_name, "beach_grade", "stars", "mdi:star-circle", EntityCategory.DIAGNOSTIC)
     ]
     async_add_entities(sensors)
 
 class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
     _attr_has_entity_name = True
 
-    def __init__(self, coordinator, beach_name, name_suffix, key, icon, category=None):
+    def __init__(self, coordinator, beach_name, translation_key, key, icon, category=None):
         super().__init__(coordinator)
         self._beach_name = beach_name
         self._key = key
-        self._attr_name = name_suffix
+        self._attr_translation_key = translation_key
         self._attr_icon = icon
         self._attr_entity_category = category
         self._attr_unique_id = f"{beach_name}_{key}"
