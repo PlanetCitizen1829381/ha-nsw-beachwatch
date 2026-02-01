@@ -22,5 +22,21 @@
         }
       }
     }
+  },
+  "entity": {
+    "sensor": {
+      "water_pollution": {
+        "name": "Water Pollution"
+      },
+      "advice": {
+        "name": "Advice"
+      },
+      "bacteria_level": {
+        "name": "Bacteria Level"
+      },
+      "beach_grade": {
+        "name": "Beach Grade"
+      }
+    }
   }
 }
