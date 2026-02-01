@@ -28,43 +28,43 @@ ADVICE_MAP = {
         "details": "Recent rainfall or events may have caused temporary elevation in bacteria. Water quality is usually suitable, but vulnerable groups should take care."
     },
     "likely": {
-        "state": "Water quality is unsuitable for swimming. Avoid swimming today.",
+        "state": "Swimming is not recommended.",
         "risk": "Pollution Likely",
-        "details": "High probability of faecal contamination and illness transmission. Significant risk of illness."
+        "details": "High levels of bacteria are likely. Rainfall and stormwater runoff have heavily impacted water quality."
     }
 }
 
 def get_microbial_meaning(stars):
-    mapping = {
-        4: "Good: Bacterial levels are safe for bathing.",
-        3: "Fair: Bacterial levels indicate an increased risk of illness.",
-        2: "Poor: Bacterial levels indicate a substantially increased risk of illness.",
-        1: "Bad: Bacterial levels indicate a significant risk of illness."
-    }
-    return mapping.get(stars, "No assessment available.")
+    try:
+        star_val = int(stars)
+        if star_val == 4: return "Excellent"
+        if star_val == 3: return "Good"
+        if star_val == 2: return "Fair"
+        if star_val == 1: return "Poor"
+    except (ValueError, TypeError):
+        pass
+    return "Unknown"
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
     beach_name = entry.data.get("beach_name")
-    
+
     sensors = [
-        NSWBeachwatchSensor(coordinator, beach_name, "advice", "advice", "mdi:information-outline"),
-        NSWBeachwatchSensor(coordinator, beach_name, "latest_water_quality", "latest_results", "mdi:star-check", EntityCategory.DIAGNOSTIC),
-        NSWBeachwatchSensor(coordinator, beach_name, "annual_grade", "annual_grade", "mdi:star", EntityCategory.DIAGNOSTIC)
+        NSWBeachwatchSensor(coordinator, beach_name, "advice"),
+        NSWBeachwatchSensor(coordinator, beach_name, "latest_results"),
+        NSWBeachwatchSensor(coordinator, beach_name, "annual_grade"),
     ]
     async_add_entities(sensors)
 
 class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
     _attr_has_entity_name = True
 
-    def __init__(self, coordinator, beach_name, translation_key, key, icon, category=None):
+    def __init__(self, coordinator, beach_name, key):
         super().__init__(coordinator)
         self._beach_name = beach_name
         self._key = key
-        self._attr_translation_key = translation_key
-        self._attr_icon = icon
-        self._attr_entity_category = category
         self._attr_unique_id = f"{beach_name}_{key}"
+        self._attr_translation_key = key
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, beach_name)},
             name=beach_name,
@@ -79,14 +79,14 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
 
         if self._key == "advice":
             forecast = str(data.get("forecast", "Unknown")).lower()
-            return ADVICE_MAP.get(forecast, {}).get("state", "No forecast available.")
+            return ADVICE_MAP.get(forecast, {}).get("state", "Check local signs.")
 
         if self._key == "latest_results":
             stars = data.get("stars")
-            return f"{stars} Stars" if stars else "N/A"
+            return f"{stars} Stars" if stars else "No Data"
 
         if self._key == "annual_grade":
-            return data.get("beach_grade", "N/A")
+            return data.get("beach_grade", "Not Rated")
             
         return None
 
@@ -95,6 +95,9 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
         attrs = {}
         data = self.coordinator.data
         if data:
+            attrs["latitude"] = data.get("latitude")
+            attrs["longitude"] = data.get("longitude")
+
             if self._key == "advice":
                 forecast = str(data.get("forecast", "Unknown")).lower()
                 advice_info = ADVICE_MAP.get(forecast, {})
@@ -119,5 +122,5 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
             if self._key == "annual_grade":
                 grade = data.get("beach_grade")
                 attrs["meaning"] = GRADE_MEANINGS.get(grade, "No description available.")
-                
+
         return attrs
