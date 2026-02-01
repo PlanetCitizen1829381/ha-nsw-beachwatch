@@ -6,12 +6,12 @@ from .const import DOMAIN, MANUFACTURER
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
     beach_name = entry.data.get("beach_name")
-    
     async_add_entities([NSWBeachwatchBinarySensor(coordinator, beach_name)])
 
 class NSWBeachwatchBinarySensor(CoordinatorEntity, BinarySensorEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "swimming_safety"
+    _attr_icon = "mdi:check-circle-outline"
 
     def __init__(self, coordinator, beach_name):
         super().__init__(coordinator)
@@ -28,10 +28,5 @@ class NSWBeachwatchBinarySensor(CoordinatorEntity, BinarySensorEntity):
         data = self.coordinator.data
         if not data:
             return None
-        
         forecast = str(data.get("forecast", "")).lower()
         return forecast == "unlikely"
-
-    @property
-    def icon(self):
-        return "mdi:check-circle-outline" if self.is_on else "mdi:alert-circle-outline"
