@@ -11,6 +11,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 class NSWBeachwatchBinarySensor(CoordinatorEntity, BinarySensorEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "swimming_safety"
+    _attr_icon = "mdi:check-circle-outline"
 
     def __init__(self, coordinator, beach_name):
         super().__init__(coordinator)
@@ -21,11 +22,6 @@ class NSWBeachwatchBinarySensor(CoordinatorEntity, BinarySensorEntity):
             name=beach_name,
             manufacturer=MANUFACTURER,
         )
-        self._sort_order = 2
-
-    @property
-    def icon(self):
-        return "mdi:check-circle-outline"
 
     @property
     def is_on(self):
