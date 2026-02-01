@@ -36,6 +36,12 @@
           },
           "last_official_update": {
             "name": "Last Official Update"
+          },
+          "latitude": {
+            "name": "Latitude"
+          },
+          "longitude": {
+            "name": "Longitude"
           }
         }
       },
@@ -50,6 +56,12 @@
           },
           "last_sample_date": {
             "name": "Last Sample Date"
+          },
+          "latitude": {
+            "name": "Latitude"
+          },
+          "longitude": {
+            "name": "Longitude"
           }
         }
       },
@@ -58,6 +70,12 @@
         "state_attributes": {
           "meaning": {
             "name": "Meaning"
+          },
+          "latitude": {
+            "name": "Latitude"
+          },
+          "longitude": {
+            "name": "Longitude"
           }
         }
       }
