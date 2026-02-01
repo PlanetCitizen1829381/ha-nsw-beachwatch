@@ -42,14 +42,11 @@
           },
           "longitude": {
             "name": "Longitude"
-          },
-          "beach_details_url": {
-            "name": "Official Beach Report"
           }
         }
       },
-      "latest_water_quality": {
-        "name": "Latest Water Quality",
+      "latest_results": {
+        "name": "Water Quality Test",
         "state_attributes": {
           "enterococci_level": {
             "name": "Enterococci Level"
@@ -65,9 +62,6 @@
           },
           "longitude": {
             "name": "Longitude"
-          },
-          "beach_details_url": {
-            "name": "Official Beach Report"
           }
         }
       },
@@ -82,23 +76,16 @@
           },
           "longitude": {
             "name": "Longitude"
-          },
-          "beach_details_url": {
-            "name": "Official Beach Report"
           }
         }
       },
       "water_quality_rating": {
-        "name": "Water Quality Rating"
+        "name": "Water Quality History"
       }
     },
     "binary_sensor": {
       "swimming_safety": {
-        "name": "Swimming Safety",
-        "state": {
-          "on": "Safe",
-          "off": "Unsafe"
-        }
+        "name": "Swimming Safety"
       }
     }
   }
