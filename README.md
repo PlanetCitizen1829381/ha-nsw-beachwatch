@@ -55,7 +55,7 @@ This sensor provides the yearly suitability classification.
 | :--- | :--- | :--- |
 | **Forecasts** | **Twice Daily** | Updated at **6:00 AM** and **1:30 PM**. |
 | **Lab Results** | **Weekly** | Updated as laboratory results become available. |
-| **Annual Grade** | **Annually** | Updated every October in the *State of the Beaches* report. |
+| **Annual Grade** | **Annually** | Updated every October in the [State of the Beaches](https://www.beachwatch.nsw.gov.au/stateOfTheBeaches) report. |
 
 ---
 
