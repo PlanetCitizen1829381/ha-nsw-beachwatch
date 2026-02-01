@@ -51,6 +51,7 @@ class NSWBeachwatchAPI:
                             props = feature.get("properties", {})
                             if props.get("siteName") == beach_name or props.get("name") == beach_name:
                                 return {
+                                    "id": props.get("id"),
                                     "forecast": props.get("pollutionForecast", "Unknown"),
                                     "bacteria": props.get("latestResult"),
                                     "stars": props.get("latestResultRating"),
