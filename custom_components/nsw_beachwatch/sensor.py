@@ -113,7 +113,7 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
                     attrs["last_sample_date"] = raw_date.split("T")[0]
 
             if self._key == "annual_grade":
-                grade = data.get("beach_grade")
+                grade = self.native_value
                 attrs["meaning"] = GRADE_MEANINGS.get(grade, "Rating will be applied following the annual State of the Beaches report.")
 
         return attrs
