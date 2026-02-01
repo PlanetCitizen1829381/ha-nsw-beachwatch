@@ -6,6 +6,15 @@ from .const import DOMAIN, MANUFACTURER
 
 _LOGGER = logging.getLogger(__name__)
 
+GRADE_MEANINGS = {
+    "Very Good": "Excellent water quality; suitable for swimming almost all the time.",
+    "Good": "Generally good; suitable most of the time, but susceptible to pollution after rain.",
+    "Fair": "Often suitable, but extra care should be taken after any rainfall.",
+    "Poor": "Susceptible to pollution; water quality is not always suitable.",
+    "Very Poor": "Very susceptible to pollution; avoid swimming almost all the time.",
+    "Follow Up": "Used when the sanitary inspection and water data don't match, requiring further assessment."
+}
+
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
     beach_name = entry.data.get("beach_name")
@@ -14,7 +23,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         NSWBeachwatchSensor(coordinator, beach_name, "water_pollution", "status", "mdi:waves-arrow-up"),
         NSWBeachwatchSensor(coordinator, beach_name, "advice", "advice", "mdi:information-outline"),
         NSWBeachwatchSensor(coordinator, beach_name, "bacteria_level", "bacteria", "mdi:microscope", EntityCategory.DIAGNOSTIC),
-        NSWBeachwatchSensor(coordinator, beach_name, "beach_grade", "stars", "mdi:star-circle", EntityCategory.DIAGNOSTIC)
+        NSWBeachwatchSensor(coordinator, beach_name, "star_rating", "stars", "mdi:star-circle", EntityCategory.DIAGNOSTIC),
+        NSWBeachwatchSensor(coordinator, beach_name, "annual_grade", "annual_grade", "mdi:star", EntityCategory.DIAGNOSTIC)
     ]
     async_add_entities(sensors)
 
@@ -41,10 +51,8 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
         if not data:
             return None
 
-        forecast = str(data.get("forecast", "Unknown"))
-
         if self._key == "status":
-            return forecast
+            return str(data.get("forecast", "Unknown"))
         
         if self._key == "bacteria":
             val = data.get("bacteria")
@@ -53,14 +61,17 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
         if self._key == "stars":
             val = data.get("stars")
             return f"{val} Stars" if val else "N/A"
+
+        if self._key == "annual_grade":
+            return data.get("beach_grade", "N/A")
             
         if self._key == "advice":
-            forecast_lower = forecast.lower()
-            if "unlikely" in forecast_lower:
+            forecast = str(data.get("forecast", "Unknown")).lower()
+            if "unlikely" in forecast:
                 return "Water quality is suitable for swimming. Enjoy a swim!"
-            elif "possible" in forecast_lower:
+            elif "possible" in forecast:
                 return "Caution advised for swimming. Children or elderly may be at risk."
-            elif "likely" in forecast_lower:
+            elif "likely" in forecast:
                 return "Water quality is unsuitable for swimming. Avoid swimming today."
             return "No forecast available."
             
@@ -68,6 +79,12 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def extra_state_attributes(self):
+        attrs = {}
         if self.coordinator.data:
-            return {"last_sample_date": self.coordinator.data.get("sample_date")}
-        return {}
+            attrs["last_sample_date"] = self.coordinator.data.get("sample_date")
+            
+            if self._key == "annual_grade":
+                grade = self.coordinator.data.get("beach_grade")
+                attrs["meaning"] = GRADE_MEANINGS.get(grade, "No description available.")
+                
+        return attrs
