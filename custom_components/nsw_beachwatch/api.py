@@ -44,19 +44,19 @@ class NSWBeachwatchAPI:
                 geometry = feature.get("geometry", {})
                 coordinates = geometry.get("coordinates", [None, None])
                 
-                bacteria = properties.get("enterococci")
-                if bacteria is None:
-                    bacteria = properties.get("enterococciValue")
-                if bacteria is None:
-                    bacteria = properties.get("enterococci_value")
-
+                raw_bacteria = properties.get("enterococci")
+                if raw_bacteria is None:
+                    raw_bacteria = properties.get("enterococciValue")
+                if raw_bacteria is None:
+                    raw_bacteria = properties.get("latestResultValue")
+                
                 return {
                     "beach_name": properties.get("siteName"),
                     "forecast": properties.get("pollutionForecast"),
                     "forecast_date": properties.get("pollutionForecastTimeStamp"),
                     "stars": properties.get("latestResultRating"),
                     "latest_result": properties.get("latestResult"),
-                    "bacteria": bacteria,
+                    "bacteria": raw_bacteria,
                     "sample_date": properties.get("latestResultObservationDate"),
                     "latitude": coordinates[1],
                     "longitude": coordinates[0],
