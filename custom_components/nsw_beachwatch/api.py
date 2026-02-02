@@ -16,14 +16,11 @@ class NSWBeachwatchAPI:
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.get(self.url, headers=self.headers, timeout=15) as response:
-                    if response.status == 406:
-                        _LOGGER.error("NSW Beachwatch API returned 406: Header rejection. Trying fallback...")
-                    
                     if response.status != 200:
                         _LOGGER.error("NSW Beachwatch API returned status code %s", response.status)
                         return None
                     
-                    data = await response.json()
+                    data = await response.json(content_type=None)
                     
                     if not data or "features" not in data:
                         _LOGGER.error("NSW Beachwatch API returned malformed or empty data")
