@@ -3,6 +3,7 @@ from homeassistant.components.sensor import SensorEntity, SensorStateClass
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.util import dt as dt_util
+from datetime import datetime
 from .const import DOMAIN, MANUFACTURER
 
 _LOGGER = logging.getLogger(__name__)
@@ -125,5 +126,9 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
                 attrs["enterococci_level"] = "N/A"
             raw_date = data.get("sample_date")
             if raw_date:
-                attrs["last_sample_date"] = raw_date.split("T")[0]
+                try:
+                    date_obj = datetime.fromisoformat(raw_date.replace('Z', '+00:00'))
+                    attrs["last_sample_date"] = date_obj.strftime("%d %B %Y")
+                except:
+                    attrs["last_sample_date"] = raw_date.split("T")[0]
         return attrs
