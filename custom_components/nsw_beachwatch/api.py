@@ -8,14 +8,17 @@ class NSWBeachwatchAPI:
     def __init__(self):
         self.url = "https://www.beachwatch.nsw.gov.au/data/rest/sites/geomedium"
         self.headers = {
-            "Accept": "application/json",
-            "User-Agent": "HomeAssistant-Beachwatch-Integration"
+            "Accept": "*/*",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
 
     async def get_beach_status(self, beach_name):
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.get(self.url, headers=self.headers, timeout=15) as response:
+                    if response.status == 406:
+                        _LOGGER.error("NSW Beachwatch API returned 406: Header rejection. Trying fallback...")
+                    
                     if response.status != 200:
                         _LOGGER.error("NSW Beachwatch API returned status code %s", response.status)
                         return None
