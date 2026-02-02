@@ -19,7 +19,6 @@ class NSWBeachwatchAPI:
             async with session.get(self.base_url, headers=self.headers, timeout=15) as response:
                 if response.status != 200:
                     return []
-                
                 data = await response.json()
                 beaches = []
                 for feature in data.get("features", []):
@@ -27,42 +26,35 @@ class NSWBeachwatchAPI:
                     if name:
                         beaches.append(name)
                 return sorted(list(set(beaches)))
-        except Exception as e:
-            _LOGGER.error("Error fetching beach list: %s", e)
+        except Exception:
             return []
 
     async def get_beach_status(self, beach_name):
         session = async_get_clientsession(self.hass)
         url = f"{self.base_url}?site_name={beach_name.replace(' ', '%20')}"
-        
         try:
             async with session.get(url, headers=self.headers, timeout=15) as response:
                 if response.status != 200:
-                    _LOGGER.error("Beachwatch API returned status %s", response.status)
                     return None
-                
                 data = await response.json()
-                
                 if not data or "features" not in data or not data["features"]:
                     return None
-
                 feature = data["features"][0]
                 properties = feature.get("properties", {})
                 geometry = feature.get("geometry", {})
                 coordinates = geometry.get("coordinates", [None, None])
-
                 return {
                     "beach_name": properties.get("siteName"),
                     "forecast": properties.get("pollutionForecast"),
                     "forecast_date": properties.get("pollutionForecastTimeStamp"),
-                    "stars": properties.get("siteGradeNumerical"),
+                    "stars": properties.get("latestResultRating"),
+                    "latest_result": properties.get("latestResult"),
                     "bacteria": properties.get("enterococciValue"),
-                    "sample_date": properties.get("sampleDate"),
+                    "sample_date": properties.get("latestResultObservationDate"),
                     "latitude": coordinates[1],
                     "longitude": coordinates[0],
                     "region": properties.get("regionName"),
                     "council": properties.get("councilName")
                 }
-        except Exception as e:
-            _LOGGER.error("Unexpected error in Beachwatch API: %s", e)
+        except Exception:
             return None
