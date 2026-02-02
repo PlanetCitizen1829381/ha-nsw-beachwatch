@@ -92,8 +92,11 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
         attrs = {}
         data = self.coordinator.data
         if data:
-            if data.get("latitude"): attrs["latitude"] = data.get("latitude")
-            if data.get("longitude"): attrs["longitude"] = data.get("longitude")
+            lat = data.get("latitude")
+            lon = data.get("longitude")
+            if lat and lon:
+                attrs["latitude"] = float(lat)
+                attrs["longitude"] = float(lon)
 
             forecast = str(data.get("forecast", "Unknown")).lower()
             advice_info = ADVICE_MAP.get(forecast, {})
@@ -101,9 +104,14 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
             if self._key in ["advice", "swimming_safety"]:
                 attrs["risk_level"] = advice_info.get("risk", "Unknown")
                 attrs["risk_meaning"] = advice_info.get("details", "Check for signs of pollution.")
+                
                 raw_update = data.get("forecast_date")
                 if raw_update:
-                    attrs["last_official_update"] = raw_update.split("+")[0].replace("T", " ")
+                    try:
+                        clean_time = raw_update.split("+")[0].replace("T", " ")
+                        attrs["last_official_update"] = clean_time
+                    except Exception:
+                        attrs["last_official_update"] = raw_update
 
             if self._key == "latest_results":
                 bacteria = data.get("bacteria")
