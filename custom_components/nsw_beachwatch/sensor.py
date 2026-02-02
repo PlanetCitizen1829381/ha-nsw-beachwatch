@@ -6,15 +6,6 @@ from .const import DOMAIN, MANUFACTURER
 
 _LOGGER = logging.getLogger(__name__)
 
-GRADE_MEANINGS = {
-    "Very Good": "Excellent water quality; suitable for swimming almost all the time.",
-    "Good": "Generally good; suitable most of the time, but susceptible to pollution after rain.",
-    "Fair": "Often suitable, but extra care should be taken after any rainfall.",
-    "Poor": "Susceptible to pollution; water quality is not always suitable.",
-    "Very Poor": "Very susceptible to pollution; avoid swimming almost all the time.",
-    "Follow Up": "Requires further assessment."
-}
-
 ADVICE_MAP = {
     "unlikely": {
         "state": "Water quality is suitable for swimming. Enjoy a swim!",
@@ -41,7 +32,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
         NSWBeachwatchSensor(coordinator, beach_name, "advice", "mdi:swim", 1),
         NSWBeachwatchSensor(coordinator, beach_name, "latest_results", "mdi:microscope", 3),
         NSWBeachwatchSensor(coordinator, beach_name, "water_quality_rating", "mdi:chart-line", 4),
-        NSWBeachwatchSensor(coordinator, beach_name, "annual_grade", "mdi:star", 5),
     ]
     async_add_entities(sensors)
 
@@ -81,12 +71,6 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
         if self._key == "water_quality_rating":
             return data.get("stars")
 
-        if self._key == "annual_grade":
-            grade = data.get("beach_grade")
-            if grade and grade != "Unknown":
-                return grade
-            return "Awaiting Report"
-
         return None
 
     @property
@@ -112,9 +96,5 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
                 raw_date = data.get("sample_date")
                 if raw_date:
                     attrs["last_sample_date"] = raw_date.split("T")[0]
-
-            if self._key == "annual_grade":
-                grade = self.native_value
-                attrs["meaning"] = GRADE_MEANINGS.get(grade, "Rating will be applied following the annual State of the Beaches report.")
 
         return attrs
