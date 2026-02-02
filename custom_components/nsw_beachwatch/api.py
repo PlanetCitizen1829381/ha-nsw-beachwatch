@@ -70,4 +70,3 @@ class NSWBeachwatchAPI:
         except Exception as e:
             _LOGGER.error(f"Error fetching beach status for {beach_name}: {e}")
             return None
-
