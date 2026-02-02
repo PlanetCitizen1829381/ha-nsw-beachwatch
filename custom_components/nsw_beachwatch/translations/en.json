@@ -36,6 +36,18 @@
           },
           "last_official_update": {
             "name": "Last Official Update"
+          },
+          "latitude": {
+            "name": "Latitude"
+          },
+          "longitude": {
+            "name": "Longitude"
+          },
+          "region": {
+            "name": "Region"
+          },
+          "attribution": {
+            "name": "Attribution"
           }
         }
       },
@@ -56,6 +68,12 @@
           },
           "longitude": {
             "name": "Longitude"
+          },
+          "region": {
+            "name": "Region"
+          },
+          "attribution": {
+            "name": "Attribution"
           }
         }
       },
@@ -71,16 +89,40 @@
           "last_sample_date": {
             "name": "Last Sample Date"
           },
-          "latitude": {
-            "name": "Latitude"
+          "region": {
+            "name": "Region"
           },
-          "longitude": {
-            "name": "Longitude"
+          "attribution": {
+            "name": "Attribution"
           }
         }
       },
       "water_quality_rating": {
-        "name": "Water Quality History"
+        "name": "Water Quality History",
+        "state_attributes": {
+          "region": {
+            "name": "Region"
+          },
+          "attribution": {
+            "name": "Attribution"
+          }
+        }
+      }
+    },
+    "binary_sensor": {
+      "safe_to_swim": {
+        "name": "Safe to Swim",
+        "state_attributes": {
+          "forecast": {
+            "name": "Forecast"
+          },
+          "risk_level": {
+            "name": "Risk Level"
+          },
+          "attribution": {
+            "name": "Attribution"
+          }
+        }
       }
     }
   }
