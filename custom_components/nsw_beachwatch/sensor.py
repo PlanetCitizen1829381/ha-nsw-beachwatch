@@ -10,17 +10,20 @@ ADVICE_MAP = {
     "unlikely": {
         "state": "Water quality is suitable for swimming. Enjoy a swim!",
         "risk": "Pollution Unlikely",
-        "details": "Microbial levels are expected to be within safe guidelines."
+        "details": "Microbial levels are expected to be within safe guidelines.",
+        "safety": "Safe"
     },
     "possible": {
         "state": "Caution advised for swimming.",
         "risk": "Pollution Possible",
-        "details": "Recent rainfall may have caused temporary elevation in bacteria."
+        "details": "Recent rainfall may have caused temporary elevation in bacteria.",
+        "safety": "Caution"
     },
     "likely": {
         "state": "Avoid swimming. High risk of pollution.",
         "risk": "Pollution Likely",
-        "details": "Bacteria levels are likely to exceed safe limits."
+        "details": "Bacteria levels are likely to exceed safe limits.",
+        "safety": "Unsafe"
     }
 }
 
@@ -30,6 +33,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     
     sensors = [
         NSWBeachwatchSensor(coordinator, beach_name, "advice", "mdi:swim", 1),
+        NSWBeachwatchSensor(coordinator, beach_name, "swimming_safety", "mdi:shield-check", 2),
         NSWBeachwatchSensor(coordinator, beach_name, "latest_results", "mdi:microscope", 3),
         NSWBeachwatchSensor(coordinator, beach_name, "water_quality_rating", "mdi:chart-line", 4),
     ]
@@ -60,9 +64,13 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
         if not data:
             return None
 
+        forecast = str(data.get("forecast", "Unknown")).lower()
+
         if self._key == "advice":
-            forecast = str(data.get("forecast", "Unknown")).lower()
             return ADVICE_MAP.get(forecast, {}).get("state", "Check local signs.")
+
+        if self._key == "swimming_safety":
+            return ADVICE_MAP.get(forecast, {}).get("safety", "Unknown")
 
         if self._key == "latest_results":
             stars = data.get("stars")
@@ -81,9 +89,10 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
             if data.get("latitude"): attrs["latitude"] = data.get("latitude")
             if data.get("longitude"): attrs["longitude"] = data.get("longitude")
 
-            if self._key == "advice":
-                forecast = str(data.get("forecast", "Unknown")).lower()
-                advice_info = ADVICE_MAP.get(forecast, {})
+            forecast = str(data.get("forecast", "Unknown")).lower()
+            advice_info = ADVICE_MAP.get(forecast, {})
+
+            if self._key in ["advice", "swimming_safety"]:
                 attrs["risk_level"] = advice_info.get("risk", "Unknown")
                 attrs["risk_meaning"] = advice_info.get("details", "Check for signs of pollution.")
                 raw_update = data.get("forecast_date")
