@@ -64,21 +64,16 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
         data = self.coordinator.data
         if not data:
             return None
-
         forecast = str(data.get("forecast", "Unknown")).lower()
         if self._key == "swimming_safety":
             return ADVICE_MAP.get(forecast, {}).get("safety", "Unknown")
-
         if self._key == "advice":
             return ADVICE_MAP.get(forecast, {}).get("state", "Check local signs.")
-
         if self._key == "latest_results":
             result = data.get("latest_result")
             return result if result else "Awaiting Lab Results"
-
         if self._key == "water_quality_rating":
             return data.get("stars")
-
         return None
 
     @property
@@ -87,35 +82,29 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
         data = self.coordinator.data
         if not data:
             return attrs
-
         if self._key in ["advice", "swimming_safety"]:
             lat = data.get("latitude")
             lon = data.get("longitude")
             if lat is not None and lon is not None:
                 attrs["latitude"] = float(lat)
                 attrs["longitude"] = float(lon)
-
             forecast = str(data.get("forecast", "Unknown")).lower()
             advice_info = ADVICE_MAP.get(forecast, {})
             attrs["risk_level"] = advice_info.get("risk", "Unknown")
             attrs["risk_meaning"] = advice_info.get("details", "Check for signs of pollution.")
-            
             raw_update = data.get("forecast_date")
             if raw_update:
                 dt = dt_util.parse_datetime(raw_update)
                 if dt:
                     local_dt = dt_util.as_local(dt)
-                    attrs["last_official_update"] = local_dt.strftime("%Y-%m-%d %I:%M:%S %p")
-
+                    attrs["last_official_update"] = local_dt.strftime("%d-%m-%Y %I:%M:%S %p")
         if self._key == "latest_results":
             bacteria = data.get("bacteria")
-            if bacteria:
+            if bacteria is not None:
                 attrs["enterococci_level"] = f"{bacteria} cfu/100mL"
             else:
-                attrs["enterococci_level"] = data.get("latest_result", "N/A")
-            
+                attrs["enterococci_level"] = "N/A"
             raw_date = data.get("sample_date")
             if raw_date:
                 attrs["last_sample_date"] = raw_date.split("T")[0]
-
         return attrs
