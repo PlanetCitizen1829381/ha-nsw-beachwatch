@@ -25,6 +25,20 @@
   },
   "entity": {
     "sensor": {
+      "swimming_safety": {
+        "name": "Swimming Safety",
+        "state_attributes": {
+          "risk_level": {
+            "name": "Risk Level"
+          },
+          "risk_meaning": {
+            "name": "Risk Meaning"
+          },
+          "last_official_update": {
+            "name": "Last Official Update"
+          }
+        }
+      },
       "advice": {
         "name": "Swimming Advice",
         "state_attributes": {
@@ -36,12 +50,6 @@
           },
           "last_official_update": {
             "name": "Last Official Update"
-          },
-          "latitude": {
-            "name": "Latitude"
-          },
-          "longitude": {
-            "name": "Longitude"
           }
         }
       },
@@ -53,22 +61,11 @@
           },
           "last_sample_date": {
             "name": "Last Sample Date"
-          },
-          "latitude": {
-            "name": "Latitude"
-          },
-          "longitude": {
-            "name": "Longitude"
           }
         }
       },
       "water_quality_rating": {
         "name": "Water Quality History"
-      }
-    },
-    "binary_sensor": {
-      "swimming_safety": {
-        "name": "Swimming Safety"
       }
     }
   }
