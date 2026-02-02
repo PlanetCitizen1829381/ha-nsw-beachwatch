@@ -14,13 +14,13 @@ ADVICE_MAP = {
         "safety": "Safe"
     },
     "possible": {
-        "state": "Caution advised for swimming.",
+        "state": "Caution advised for swimming. Water quality usually suitable for swimming, but young children, elderly or those with compromised health may be at increased risk.",
         "risk": "Pollution Possible",
         "details": "Recent rainfall may have caused temporary elevation in bacteria.",
         "safety": "Caution"
     },
     "likely": {
-        "state": "Avoid swimming. High risk of pollution.",
+        "state": "Water quality is unsuitable for swimming. Avoid swimming today.",
         "risk": "Pollution Likely",
         "details": "Bacteria levels are likely to exceed safe limits.",
         "safety": "Unsafe"
