@@ -54,6 +54,10 @@ class NSWBeachwatchAPI:
                         bacteria_count = latest_result_raw.get("enterococciCount")
                     if bacteria_count is None:
                         bacteria_count = latest_result_raw.get("bacteria")
+                    if bacteria_count is None:
+                        bacteria_count = latest_result_raw.get("value")
+                    if bacteria_count is None:
+                        bacteria_count = latest_result_raw.get("enterococciBacteria")
                     display_result = latest_result_raw.get("result", "Unknown")
                 elif isinstance(latest_result_raw, str):
                     display_result = latest_result_raw
@@ -62,6 +66,20 @@ class NSWBeachwatchAPI:
                     bacteria_count = properties.get("enterococci")
                 if bacteria_count is None:
                     bacteria_count = properties.get("latestResultEnterococci")
+                if bacteria_count is None:
+                    bacteria_count = properties.get("latestResultValue")
+                if bacteria_count is None:
+                    bacteria_count = properties.get("enterococciCount")
+                if bacteria_count is None:
+                    bacteria_count = properties.get("enterococciBacteria")
+                if bacteria_count is None:
+                    bacteria_count = properties.get("bacteriaCount")
+                if bacteria_count is None:
+                    bacteria_count = properties.get("cfuPer100ml")
+                if bacteria_count is None:
+                    bacteria_count = properties.get("cfu100ml")
+
+                _LOGGER.info(f"Beachwatch API - Beach: {beach_name}, Bacteria count: {bacteria_count}, Available properties keys: {list(properties.keys())}")
 
                 return {
                     "beach_name": properties.get("siteName"),
@@ -76,5 +94,7 @@ class NSWBeachwatchAPI:
                     "region": properties.get("regionName"),
                     "council": properties.get("councilName")
                 }
-        except Exception:
+        except Exception as e:
+            _LOGGER.error(f"Error fetching beach status for {beach_name}: {e}")
             return None
+
