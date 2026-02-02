@@ -1,8 +1,7 @@
 import logging
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.components.binary_sensor import BinarySensorEntity, BinarySensorDeviceClass
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.util import dt as dt_util
 from datetime import datetime
 from .const import DOMAIN, MANUFACTURER
@@ -34,28 +33,28 @@ ADVICE_MAP = {
         "risk": "Pollution Unlikely",
         "details": "Microbial levels are expected to be within safe guidelines.",
         "safety": "Safe",
-        "icon": "mdi:shield-check-outline"
+        "icon": "mdi:shield-check"
     },
     "possible": {
         "state": "Caution advised for swimming. Young children or elderly may be at increased risk.",
         "risk": "Pollution Possible",
         "details": "Recent rainfall may have caused temporary elevation in bacteria.",
         "safety": "Caution",
-        "icon": "mdi:shield-alert-outline"
+        "icon": "mdi:shield-alert"
     },
     "likely": {
         "state": "Water quality is unsuitable for swimming. Avoid swimming today.",
         "risk": "Pollution Likely",
         "details": "Bacteria levels are likely to exceed safe limits.",
         "safety": "Unsafe",
-        "icon": "mdi:shield-remove-outline"
+        "icon": "mdi:shield-off"
     },
     "forecast not available": {
         "state": "No forecast today. Check for signs of pollution before swimming.",
         "risk": "No Forecast",
         "details": "No predictive model is currently active for this site.",
         "safety": "Unknown",
-        "icon": "mdi:shield-question-outline"
+        "icon": "mdi:shield-question"
     }
 }
 
@@ -65,8 +64,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         BeachwatchSensor(coordinator, entry, "swimming_safety"),
         BeachwatchSensor(coordinator, entry, "advice"),
         BeachwatchSensor(coordinator, entry, "latest_results"),
-        BeachwatchSensor(coordinator, entry, "water_quality_rating"),
-        BeachwatchBinarySensor(coordinator, entry, "safe_to_swim")
+        BeachwatchSensor(coordinator, entry, "water_quality_rating")
     ]
     async_add_entities(sensors)
 
@@ -99,7 +97,7 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
             data = self.coordinator.data
             if data:
                 forecast = str(data.get("forecast", "Unknown")).lower()
-                return ADVICE_MAP.get(forecast, {}).get("icon", "mdi:shield-question-outline")
+                return ADVICE_MAP.get(forecast, {}).get("icon", "mdi:shield-question")
         return self._attr_icon
 
     @property
@@ -135,6 +133,10 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
         region = data.get("region")
         if region:
             attrs["region"] = region
+        
+        council = data.get("council")
+        if council:
+            attrs["council"] = council
         
         if self._key in ["advice", "swimming_safety"]:
             lat = data.get("latitude")
@@ -180,41 +182,3 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
         
         attrs["attribution"] = "Data provided by NSW Beachwatch"
         return attrs
-
-class BeachwatchBinarySensor(CoordinatorEntity, BinarySensorEntity):
-    def __init__(self, coordinator, entry, key):
-        super().__init__(coordinator)
-        self._key = key
-        self._beach_name = entry.data["beach_name"]
-        self._attr_unique_id = f"{entry.entry_id}_{key}"
-        self._attr_has_entity_name = True
-        self._attr_translation_key = key
-        self._attr_device_class = BinarySensorDeviceClass.SAFETY
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name=self._beach_name,
-            manufacturer=MANUFACTURER,
-            model="NSW Beachwatch API",
-            configuration_url="https://www.beachwatch.nsw.gov.au"
-        )
-
-    @property
-    def is_on(self):
-        data = self.coordinator.data
-        if not data:
-            return None
-        forecast = str(data.get("forecast", "Unknown")).lower()
-        return forecast == "unlikely"
-
-    @property
-    def extra_state_attributes(self):
-        attrs = {}
-        data = self.coordinator.data
-        if data:
-            forecast = str(data.get("forecast", "Unknown")).lower()
-            advice_info = ADVICE_MAP.get(forecast, {})
-            attrs["forecast"] = data.get("forecast", "Unknown")
-            attrs["risk_level"] = advice_info.get("risk", "Unknown")
-            attrs["attribution"] = "Data provided by NSW Beachwatch"
-        return attrs
-
