@@ -58,6 +58,25 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
             manufacturer=MANUFACTURER,
             model="NSW Beachwatch API",
         )
+        
+        if key == "advice":
+            self._attr_icon = "mdi:swim"
+        elif key == "swimming_safety":
+            self._attr_icon = "mdi:chart-line"
+        elif key == "latest_results":
+            self._attr_icon = "mdi:microscope"
+
+    @property
+    def state_class(self):
+        if self._key == "water_quality_rating":
+            return SensorStateClass.MEASUREMENT
+        return None
+
+    @property
+    def native_unit_of_measurement(self):
+        if self._key == "water_quality_rating":
+            return "Stars"
+        return None
 
     @property
     def state(self):
