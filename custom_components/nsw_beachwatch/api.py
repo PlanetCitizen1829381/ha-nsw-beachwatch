@@ -44,11 +44,16 @@ class NSWBeachwatchAPI:
                 geometry = feature.get("geometry", {})
                 coordinates = geometry.get("coordinates", [None, None])
                 
+                _LOGGER.warning(f"DEBUG {beach_name} - All property keys: {list(properties.keys())}")
+                
                 latest_result_raw = properties.get("latestResult")
                 bacteria_count = None
                 display_result = "Unknown"
 
+                _LOGGER.warning(f"DEBUG {beach_name} - latestResult type: {type(latest_result_raw)}, value: {latest_result_raw}")
+
                 if isinstance(latest_result_raw, dict):
+                    _LOGGER.warning(f"DEBUG {beach_name} - latestResult dict keys: {list(latest_result_raw.keys())}")
                     bacteria_count = latest_result_raw.get("enterococci")
                     if bacteria_count is None:
                         bacteria_count = latest_result_raw.get("enterococciCount")
@@ -58,6 +63,10 @@ class NSWBeachwatchAPI:
                         bacteria_count = latest_result_raw.get("value")
                     if bacteria_count is None:
                         bacteria_count = latest_result_raw.get("enterococciBacteria")
+                    if bacteria_count is None:
+                        bacteria_count = latest_result_raw.get("cfu")
+                    if bacteria_count is None:
+                        bacteria_count = latest_result_raw.get("count")
                     display_result = latest_result_raw.get("result", "Unknown")
                 elif isinstance(latest_result_raw, str):
                     display_result = latest_result_raw
@@ -78,8 +87,12 @@ class NSWBeachwatchAPI:
                     bacteria_count = properties.get("cfuPer100ml")
                 if bacteria_count is None:
                     bacteria_count = properties.get("cfu100ml")
+                if bacteria_count is None:
+                    bacteria_count = properties.get("latestResultCfu")
+                if bacteria_count is None:
+                    bacteria_count = properties.get("cfu")
 
-                _LOGGER.info(f"Beachwatch API - Beach: {beach_name}, Bacteria count: {bacteria_count}, Available properties keys: {list(properties.keys())}")
+                _LOGGER.warning(f"DEBUG {beach_name} - Final bacteria_count: {bacteria_count} (type: {type(bacteria_count)})")
 
                 return {
                     "beach_name": properties.get("siteName"),
@@ -97,4 +110,3 @@ class NSWBeachwatchAPI:
         except Exception as e:
             _LOGGER.error(f"Error fetching beach status for {beach_name}: {e}")
             return None
-
