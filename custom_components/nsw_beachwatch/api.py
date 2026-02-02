@@ -44,7 +44,9 @@ class NSWBeachwatchAPI:
                 geometry = feature.get("geometry", {})
                 coordinates = geometry.get("coordinates", [None, None])
                 
-                bacteria = properties.get("enterococciValue")
+                bacteria = properties.get("enterococci")
+                if bacteria is None:
+                    bacteria = properties.get("enterococciValue")
                 if bacteria is None:
                     bacteria = properties.get("enterococci_value")
 
