@@ -2,6 +2,7 @@ import logging
 from homeassistant.components.sensor import SensorEntity, SensorStateClass
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.util import dt as dt_util
 from .const import DOMAIN, MANUFACTURER
 
 _LOGGER = logging.getLogger(__name__)
@@ -35,52 +36,45 @@ ADVICE_MAP = {
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    beach_name = entry.data.get("beach_name")
-    
     sensors = [
-        NSWBeachwatchSensor(coordinator, beach_name, "advice", "mdi:swim", 1),
-        NSWBeachwatchSensor(coordinator, beach_name, "swimming_safety", "mdi:shield-check", 2),
-        NSWBeachwatchSensor(coordinator, beach_name, "latest_results", "mdi:microscope", 3),
-        NSWBeachwatchSensor(coordinator, beach_name, "water_quality_rating", "mdi:chart-line", 4),
+        BeachwatchSensor(coordinator, entry, "swimming_safety"),
+        BeachwatchSensor(coordinator, entry, "advice"),
+        BeachwatchSensor(coordinator, entry, "latest_results"),
+        BeachwatchSensor(coordinator, entry, "water_quality_rating")
     ]
     async_add_entities(sensors)
 
-class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
-    _attr_has_entity_name = True
-
-    def __init__(self, coordinator, beach_name, key, icon, sort_order):
+class BeachwatchSensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator, entry, key):
         super().__init__(coordinator)
-        self._beach_name = beach_name
         self._key = key
-        self._attr_icon = icon
+        self._beach_name = entry.data["beach_name"]
+        self._attr_unique_id = f"{entry.entry_id}_{key}"
+        self._attr_has_entity_name = True
         self._attr_translation_key = key
-        self._attr_unique_id = f"{beach_name}_{key}"
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, beach_name)},
-            name=beach_name,
+            identifiers={(DOMAIN, entry.entry_id)},
+            name=self._beach_name,
             manufacturer=MANUFACTURER,
+            model="NSW Beachwatch API",
         )
-        self._sort_order = sort_order
-        if key == "water_quality_rating":
-            self._attr_state_class = SensorStateClass.MEASUREMENT
 
     @property
-    def native_value(self):
+    def state(self):
         data = self.coordinator.data
         if not data:
             return None
 
         forecast = str(data.get("forecast", "Unknown")).lower()
+        if self._key == "swimming_safety":
+            return ADVICE_MAP.get(forecast, {}).get("safety", "Unknown")
 
         if self._key == "advice":
             return ADVICE_MAP.get(forecast, {}).get("state", "Check local signs.")
 
-        if self._key == "swimming_safety":
-            return ADVICE_MAP.get(forecast, {}).get("safety", "Unknown")
-
         if self._key == "latest_results":
-            stars = data.get("stars")
-            return f"{stars} Stars" if stars is not None else "Awaiting Lab Results"
+            result = data.get("latest_result")
+            return result if result else "Awaiting Lab Results"
 
         if self._key == "water_quality_rating":
             return data.get("stars")
@@ -91,7 +85,10 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
     def extra_state_attributes(self):
         attrs = {}
         data = self.coordinator.data
-        if data:
+        if not data:
+            return attrs
+
+        if self._key in ["advice", "swimming_safety"]:
             lat = data.get("latitude")
             lon = data.get("longitude")
             if lat is not None and lon is not None:
@@ -100,20 +97,25 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
 
             forecast = str(data.get("forecast", "Unknown")).lower()
             advice_info = ADVICE_MAP.get(forecast, {})
+            attrs["risk_level"] = advice_info.get("risk", "Unknown")
+            attrs["risk_meaning"] = advice_info.get("details", "Check for signs of pollution.")
+            
+            raw_update = data.get("forecast_date")
+            if raw_update:
+                dt = dt_util.parse_datetime(raw_update)
+                if dt:
+                    local_dt = dt_util.as_local(dt)
+                    attrs["last_official_update"] = local_dt.strftime("%Y-%m-%d %I:%M:%S %p")
 
-            if self._key in ["advice", "swimming_safety"]:
-                attrs["risk_level"] = advice_info.get("risk", "Unknown")
-                attrs["risk_meaning"] = advice_info.get("details", "Check for signs of pollution.")
-                
-                raw_update = data.get("forecast_date")
-                if raw_update:
-                    attrs["last_official_update"] = raw_update.split("+")[0].replace("T", " ")
-
-            if self._key == "latest_results":
-                bacteria = data.get("bacteria")
-                attrs["enterococci_level"] = f"{bacteria} cfu/100mL" if bacteria else "N/A"
-                raw_date = data.get("sample_date")
-                if raw_date:
-                    attrs["last_sample_date"] = raw_date.split("T")[0]
+        if self._key == "latest_results":
+            bacteria = data.get("bacteria")
+            if bacteria:
+                attrs["enterococci_level"] = f"{bacteria} cfu/100mL"
+            else:
+                attrs["enterococci_level"] = data.get("latest_result", "N/A")
+            
+            raw_date = data.get("sample_date")
+            if raw_date:
+                attrs["last_sample_date"] = raw_date.split("T")[0]
 
         return attrs
