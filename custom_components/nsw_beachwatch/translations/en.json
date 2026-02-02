@@ -64,20 +64,6 @@
       },
       "water_quality_rating": {
         "name": "Water Quality History"
-      },
-      "annual_grade": {
-        "name": "Annual Beach Grade",
-        "state_attributes": {
-          "meaning": {
-            "name": "Meaning"
-          },
-          "latitude": {
-            "name": "Latitude"
-          },
-          "longitude": {
-            "name": "Longitude"
-          }
-        }
       }
     },
     "binary_sensor": {
