@@ -32,7 +32,8 @@ class NSWBeachwatchAPI:
                                     beaches.append(name)
                             return sorted(list(set(beaches)))
                 except Exception:
-                    continue
+                    if attempt == 1: return []
+                    await asyncio.sleep(2)
         return []
 
     async def get_beach_status(self, beach_name):
@@ -54,7 +55,7 @@ class NSWBeachwatchAPI:
                                     "forecast_date": props.get("pollutionForecastTimeStamp"),
                                     "bacteria": props.get("latestResult"),
                                     "stars": props.get("latestResultRating"),
-                                    "beach_grade": props.get("beachGrade"),
+                                    "beach_grade": props.get("siteGrade") or props.get("beachGrade"),
                                     "sample_date": props.get("latestResultObservationDate"),
                                     "latitude": props.get("lat"),
                                     "longitude": props.get("lon"),
