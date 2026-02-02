@@ -1,5 +1,5 @@
 import logging
-from homeassistant.components.sensor import SensorEntity, SensorStateClass
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.util import dt as dt_util
@@ -63,15 +63,11 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
         if key == "advice":
             self._attr_icon = "mdi:swim"
         elif key == "swimming_safety":
-            self._attr_icon = "mdi:chart-line"
+            self._attr_icon = "mdi:shield-check-outline"
         elif key == "latest_results":
             self._attr_icon = "mdi:microscope"
-
-    @property
-    def state_class(self):
-        if self._key == "water_quality_rating":
-            return SensorStateClass.MEASUREMENT
-        return None
+        elif key == "water_quality_rating":
+            self._attr_icon = "mdi:chart-line"
 
     @property
     def native_unit_of_measurement(self):
@@ -121,7 +117,11 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
         if self._key == "latest_results":
             bacteria = data.get("bacteria")
             if bacteria is not None:
-                attrs["enterococci_level"] = f"{bacteria} cfu/100mL"
+                try:
+                    bacteria_num = float(bacteria)
+                    attrs["enterococci_level"] = f"{bacteria_num} cfu/100mL"
+                except (ValueError, TypeError):
+                    attrs["enterococci_level"] = str(bacteria)
             else:
                 attrs["enterococci_level"] = "N/A"
             raw_date = data.get("sample_date")
@@ -132,3 +132,4 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
                 except:
                     attrs["last_sample_date"] = raw_date.split("T")[0]
         return attrs
+
