@@ -50,9 +50,18 @@ class NSWBeachwatchAPI:
 
                 if isinstance(latest_result_raw, dict):
                     bacteria_count = latest_result_raw.get("enterococci")
+                    if bacteria_count is None:
+                        bacteria_count = latest_result_raw.get("enterococciCount")
+                    if bacteria_count is None:
+                        bacteria_count = latest_result_raw.get("bacteria")
                     display_result = latest_result_raw.get("result", "Unknown")
                 elif isinstance(latest_result_raw, str):
                     display_result = latest_result_raw
+
+                if bacteria_count is None:
+                    bacteria_count = properties.get("enterococci")
+                if bacteria_count is None:
+                    bacteria_count = properties.get("latestResultEnterococci")
 
                 return {
                     "beach_name": properties.get("siteName"),
