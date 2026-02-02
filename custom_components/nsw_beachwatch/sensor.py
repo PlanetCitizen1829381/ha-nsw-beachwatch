@@ -1,7 +1,8 @@
 import logging
 from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.binary_sensor import BinarySensorEntity, BinarySensorDeviceClass
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.helpers.entity import DeviceInfo, EntityCategory
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.util import dt as dt_util
 from datetime import datetime
 from .const import DOMAIN, MANUFACTURER
@@ -60,13 +61,14 @@ ADVICE_MAP = {
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    sensors = [
+    entities = [
         BeachwatchSensor(coordinator, entry, "swimming_safety"),
         BeachwatchSensor(coordinator, entry, "advice"),
         BeachwatchSensor(coordinator, entry, "latest_results"),
-        BeachwatchSensor(coordinator, entry, "water_quality_rating")
+        BeachwatchSensor(coordinator, entry, "water_quality_rating"),
+        BeachwatchBinarySensor(coordinator, entry, "safe_to_swim")
     ]
-    async_add_entities(sensors)
+    async_add_entities(entities)
 
 class BeachwatchSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator, entry, key):
@@ -181,4 +183,50 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
                     attrs["last_sample_date"] = raw_date.split("T")[0]
         
         attrs["attribution"] = "Data provided by NSW Beachwatch"
+        return attrs
+
+class BeachwatchBinarySensor(CoordinatorEntity, BinarySensorEntity):
+    def __init__(self, coordinator, entry, key):
+        super().__init__(coordinator)
+        self._key = key
+        self._beach_name = entry.data["beach_name"]
+        self._attr_unique_id = f"{entry.entry_id}_{key}"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = key
+        self._attr_device_class = BinarySensorDeviceClass.SAFETY
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name=self._beach_name,
+            manufacturer=MANUFACTURER,
+            model="NSW Beachwatch API",
+            configuration_url="https://www.beachwatch.nsw.gov.au"
+        )
+
+    @property
+    def is_on(self):
+        data = self.coordinator.data
+        if not data:
+            return None
+        forecast = str(data.get("forecast", "Unknown")).lower()
+        return forecast == "unlikely"
+
+    @property
+    def extra_state_attributes(self):
+        attrs = {}
+        data = self.coordinator.data
+        if data:
+            forecast = str(data.get("forecast", "Unknown")).lower()
+            advice_info = ADVICE_MAP.get(forecast, {})
+            attrs["forecast"] = data.get("forecast", "Unknown")
+            attrs["risk_level"] = advice_info.get("risk", "Unknown")
+            
+            region = data.get("region")
+            if region:
+                attrs["region"] = region
+            
+            council = data.get("council")
+            if council:
+                attrs["council"] = council
+            
+            attrs["attribution"] = "Data provided by NSW Beachwatch"
         return attrs
