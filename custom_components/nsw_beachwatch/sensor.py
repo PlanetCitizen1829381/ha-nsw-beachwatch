@@ -94,7 +94,7 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
         if data:
             lat = data.get("latitude")
             lon = data.get("longitude")
-            if lat and lon:
+            if lat is not None and lon is not None:
                 attrs["latitude"] = float(lat)
                 attrs["longitude"] = float(lon)
 
@@ -107,11 +107,7 @@ class NSWBeachwatchSensor(CoordinatorEntity, SensorEntity):
                 
                 raw_update = data.get("forecast_date")
                 if raw_update:
-                    try:
-                        clean_time = raw_update.split("+")[0].replace("T", " ")
-                        attrs["last_official_update"] = clean_time
-                    except Exception:
-                        attrs["last_official_update"] = raw_update
+                    attrs["last_official_update"] = raw_update.split("+")[0].replace("T", " ")
 
             if self._key == "latest_results":
                 bacteria = data.get("bacteria")
