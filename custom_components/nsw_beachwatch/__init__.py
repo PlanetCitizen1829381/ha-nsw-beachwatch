@@ -12,7 +12,7 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORMS = ["sensor"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    api = NSWBeachwatchAPI()
+    api = NSWBeachwatchAPI(hass)
     beach_name = entry.data.get("beach_name")
     update_interval = entry.options.get("update_interval", 120)
 
