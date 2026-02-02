@@ -65,6 +65,9 @@
           "enterococci_level": {
             "name": "Enterococci Level"
           },
+          "water_quality_description": {
+            "name": "Water Quality Description"
+          },
           "last_sample_date": {
             "name": "Last Sample Date"
           },
