@@ -8,6 +8,25 @@ from .const import DOMAIN, MANUFACTURER
 
 _LOGGER = logging.getLogger(__name__)
 
+STAR_RATING_MAP = {
+    4: {
+        "range": "<41 cfu/100mL",
+        "description": "Good - bacterial levels are safe for bathing"
+    },
+    3: {
+        "range": "41-200 cfu/100mL",
+        "description": "Fair - bacterial levels indicate an increased risk of illness to bathers - particularly vulnerable persons"
+    },
+    2: {
+        "range": "201-500 cfu/100mL",
+        "description": "Poor - bacterial levels indicate a substantially increased risk of illness to bathers"
+    },
+    1: {
+        "range": ">500 cfu/100mL",
+        "description": "Bad - bacterial levels indicate a significant risk of illness to bathers"
+    }
+}
+
 ADVICE_MAP = {
     "unlikely": {
         "state": "Water quality is suitable for swimming. Enjoy a swim!",
@@ -116,14 +135,20 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
                     attrs["last_official_update"] = local_dt.strftime("%d-%m-%Y %I:%M:%S %p")
         if self._key == "latest_results":
             bacteria = data.get("bacteria")
+            stars = data.get("stars")
+            
             if bacteria is not None:
                 try:
                     bacteria_num = float(bacteria)
                     attrs["enterococci_level"] = f"{bacteria_num} cfu/100mL"
                 except (ValueError, TypeError):
                     attrs["enterococci_level"] = str(bacteria)
+            elif stars is not None and stars in STAR_RATING_MAP:
+                rating_info = STAR_RATING_MAP[stars]
+                attrs["enterococci_level"] = rating_info["range"]
+                attrs["water_quality_description"] = rating_info["description"]
             else:
-                attrs["enterococci_level"] = "N/A"
+                attrs["enterococci_level"] = "Not available"
             raw_date = data.get("sample_date")
             if raw_date:
                 try:
@@ -132,4 +157,3 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
                 except:
                     attrs["last_sample_date"] = raw_date.split("T")[0]
         return attrs
-
