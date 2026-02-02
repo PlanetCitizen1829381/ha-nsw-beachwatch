@@ -14,7 +14,7 @@ ADVICE_MAP = {
         "safety": "Safe"
     },
     "possible": {
-        "state": "Caution advised for swimming. Water quality usually suitable for swimming, but young children, elderly or those with compromised health may be at increased risk.",
+        "state": "Caution advised for swimming. Water quality is usually suitable for swimming, but young children, elderly or those with certain health conditions may be at increased risk. Consider delaying swimming until water quality improves",
         "risk": "Pollution Possible",
         "details": "Recent rainfall may have caused temporary elevation in bacteria.",
         "safety": "Caution"
@@ -24,6 +24,12 @@ ADVICE_MAP = {
         "risk": "Pollution Likely",
         "details": "Bacteria levels are likely to exceed safe limits.",
         "safety": "Unsafe"
+    },
+    "forecast not available": {
+        "state": "This site does not currently have any forecast information for today. Check for signs of pollution before swimming.",
+        "risk": "No Forecast",
+        "details": "No predictive model is currently active for this site.",
+        "safety": "Unknown"
     }
 }
 
