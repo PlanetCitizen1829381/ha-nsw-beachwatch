@@ -1,60 +1,72 @@
-from datetime import timedelta
 import logging
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from homeassistant.exceptions import ConfigEntryNotReady
-
-from .api import NSWBeachwatchAPI
-from .const import DOMAIN
+import asyncio
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = ["sensor"]
+class NSWBeachwatchAPI:
+    def __init__(self, hass):
+        self.hass = hass
+        self.base_url = "https://api.beachwatch.nsw.gov.au/public/sites/geojson"
+        self.headers = {
+            "Accept": "application/json",
+            "User-Agent": "HomeAssistant-Beachwatch-Integration"
+        }
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    api = NSWBeachwatchAPI(hass)
-    beach_name = entry.data.get("beach_name")
-    update_interval = entry.options.get("update_interval", 120)
-
-    async def async_update_data():
+    async def get_all_beaches(self):
+        session = async_get_clientsession(self.hass)
         try:
-            data = await api.get_beach_status(beach_name)
-            if data is None:
-                raise UpdateFailed(f"Unable to fetch data for {beach_name}")
-            return data
-        except Exception as err:
-            _LOGGER.error(f"Error fetching Beachwatch data for {beach_name}: {err}")
-            raise UpdateFailed(f"Error communicating with API: {err}")
+            async with session.get(self.base_url, headers=self.headers, timeout=15) as response:
+                if response.status != 200:
+                    return []
+                data = await response.json()
+                beaches = []
+                for feature in data.get("features", []):
+                    name = feature.get("properties", {}).get("siteName")
+                    if name:
+                        beaches.append(name)
+                return sorted(list(set(beaches)))
+        except Exception:
+            return []
 
-    coordinator = DataUpdateCoordinator(
-        hass,
-        _LOGGER,
-        name=f"Beachwatch {beach_name}",
-        update_method=async_update_data,
-        update_interval=timedelta(minutes=update_interval),
-    )
+    async def get_beach_status(self, beach_name):
+        session = async_get_clientsession(self.hass)
+        url = f"{self.base_url}?site_name={beach_name.replace(' ', '%20')}"
+        try:
+            async with session.get(url, headers=self.headers, timeout=15) as response:
+                if response.status != 200:
+                    return None
+                data = await response.json()
+                if not data or "features" not in data or not data["features"]:
+                    return None
+                feature = data["features"][0]
+                properties = feature.get("properties", {})
+                geometry = feature.get("geometry", {})
+                coordinates = geometry.get("coordinates", [None, None])
+                
+                latest_result_raw = properties.get("latestResult")
+                bacteria_count = None
+                display_result = "Unknown"
 
-    try:
-        await coordinator.async_config_entry_first_refresh()
-    except Exception as err:
-        _LOGGER.error(f"Failed to initialize Beachwatch integration for {beach_name}: {err}")
-        raise ConfigEntryNotReady(f"Failed to connect to Beachwatch API: {err}")
+                if isinstance(latest_result_raw, dict):
+                    bacteria_count = latest_result_raw.get("enterococci")
+                    display_result = latest_result_raw.get("result", "Unknown")
+                elif isinstance(latest_result_raw, str):
+                    display_result = latest_result_raw
 
-    hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = coordinator
-
-    entry.async_on_unload(entry.add_update_listener(update_listener))
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    
-    _LOGGER.info(f"Successfully initialized NSW Beachwatch for {beach_name}")
-    return True
-
-async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
-    await hass.config_entries.async_reload(entry.entry_id)
-
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    if unload_ok:
-        hass.data[DOMAIN].pop(entry.entry_id)
-    return unload_ok
+                return {
+                    "beach_name": properties.get("siteName"),
+                    "forecast": properties.get("pollutionForecast"),
+                    "forecast_date": properties.get("pollutionForecastTimeStamp"),
+                    "stars": properties.get("latestResultRating"),
+                    "latest_result": display_result,
+                    "bacteria": bacteria_count,
+                    "sample_date": properties.get("latestResultObservationDate"),
+                    "latitude": coordinates[1],
+                    "longitude": coordinates[0],
+                    "region": properties.get("regionName"),
+                    "council": properties.get("councilName")
+                }
+        except Exception as e:
+            _LOGGER.error(f"Error fetching beach status for {beach_name}: {e}")
+            return None
