@@ -79,7 +79,7 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
         return None
 
     @property
-    def state(self):
+    def native_value(self):
         data = self.coordinator.data
         if not data:
             return None
