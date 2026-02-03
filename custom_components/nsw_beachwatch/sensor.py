@@ -148,14 +148,6 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
                 if dt:
                     local_dt = dt_util.as_local(dt)
                     attrs["last_official_update"] = local_dt.strftime("%d-%m-%Y %I:%M:%S %p")
-            
-            region = data.get("region")
-            if region:
-                attrs["region"] = region
-            
-            council = data.get("council")
-            if council:
-                attrs["council"] = council
         
         if self._key == "latest_results":
             bacteria = data.get("bacteria")
