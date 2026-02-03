@@ -54,7 +54,7 @@ ADVICE_MAP = {
         "risk": "No Forecast",
         "details": "No predictive model is currently active for this site.",
         "safety": "Unknown",
-        "icon": "mdi:shield-question"
+        "icon": "mdi:shield-off-outline"
     }
 }
 
@@ -97,7 +97,7 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
             data = self.coordinator.data
             if data:
                 forecast = str(data.get("forecast", "Unknown")).lower()
-                return ADVICE_MAP.get(forecast, {}).get("icon", "mdi:shield-question")
+                return ADVICE_MAP.get(forecast, {}).get("icon", "mdi:shield-off-outline")
         return self._attr_icon
 
     @property
