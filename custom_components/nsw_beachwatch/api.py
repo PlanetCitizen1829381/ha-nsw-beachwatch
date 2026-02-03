@@ -44,8 +44,6 @@ class NSWBeachwatchAPI:
                 geometry = feature.get("geometry", {})
                 coordinates = geometry.get("coordinates", [None, None])
                 
-                _LOGGER.warning(f"DEBUG - Available properties for {beach_name}: {list(properties.keys())}")
-                
                 latest_result_raw = properties.get("latestResult")
                 bacteria_count = None
                 display_result = "Unknown"
@@ -56,11 +54,6 @@ class NSWBeachwatchAPI:
                 elif isinstance(latest_result_raw, str):
                     display_result = latest_result_raw
 
-                region = properties.get("regionName")
-                council = properties.get("councilName")
-                
-                _LOGGER.warning(f"DEBUG - Region: {region}, Council: {council}")
-
                 return {
                     "beach_name": properties.get("siteName"),
                     "forecast": properties.get("pollutionForecast"),
@@ -70,11 +63,8 @@ class NSWBeachwatchAPI:
                     "bacteria": bacteria_count,
                     "sample_date": properties.get("latestResultObservationDate"),
                     "latitude": coordinates[1],
-                    "longitude": coordinates[0],
-                    "region": region,
-                    "council": council
+                    "longitude": coordinates[0]
                 }
         except Exception as e:
             _LOGGER.error(f"Error fetching beach status for {beach_name}: {e}")
             return None
-
