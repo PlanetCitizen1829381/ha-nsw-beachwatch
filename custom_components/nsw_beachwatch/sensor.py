@@ -147,7 +147,16 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
                 dt = dt_util.parse_datetime(raw_update)
                 if dt:
                     local_dt = dt_util.as_local(dt)
-                    attrs["last_official_update"] = local_dt.strftime("%d-%m-%Y %I:%M:%S %p")
+                    day = local_dt.day
+                    month = local_dt.strftime("%B")
+                    year = local_dt.year
+                    hour = local_dt.hour % 12
+                    if hour == 0:
+                        hour = 12
+                    minute = local_dt.strftime("%M")
+                    second = local_dt.strftime("%S")
+                    period = local_dt.strftime("%p")
+                    attrs["last_official_update"] = f"{day} {month} {year} {hour}:{minute}:{second} {period}"
         
         if self._key == "latest_results":
             bacteria = data.get("bacteria")
