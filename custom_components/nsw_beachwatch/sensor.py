@@ -4,7 +4,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.util import dt as dt_util
 from datetime import datetime
-from .const import DOMAIN, MANUFACTURER
+from .const import DOMAIN, MANUFACTURER, MODEL
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -80,7 +80,7 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
             identifiers={(DOMAIN, entry.entry_id)},
             name=self._beach_name,
             manufacturer=MANUFACTURER,
-            model="NSW Beachwatch API",
+            model=MODEL,
             configuration_url="https://www.beachwatch.nsw.gov.au"
         )
         
