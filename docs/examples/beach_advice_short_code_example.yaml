@@ -1,0 +1,58 @@
+# Example Lovelace Card Configuration
+# Dependencies:
+#   - card-mod (https://github.com/thomasloven/lovelace-card-mod)
+#   - Bubble Card (https://github.com/Clooos/bubble-card)
+#   - Home Assistant Vertical Stack (built-in)
+
+type: custom:mod-card  # card-mod custom card
+card_mod:
+  style:
+    vertical-stack$: |
+      #root {
+        background: var(--ha-card-background, var(--card-background-color, #1a1a1a));
+        border-radius: 25px;
+        overflow: hidden;
+        position: relative;
+      }
+card:  # Home Assistant standard Vertical Stack
+  type: vertical-stack
+  cards:
+    - type: custom:bubble-card  # Bubble Card custom card
+      card_type: button
+      entity: sensor.YOUR_BEACH_NAME_swimming_advice  # Replace with your beach sensor
+      icon: mdi:swim
+      show_state: true
+      scrolling_effect: false
+      card_mod:  # card-mod styling for Bubble Card
+        style: |
+          .bubble-button-card-container {
+            background: transparent !important;
+          }
+          .bubble-name {
+            font-weight: 600;
+          }
+          .bubble-state {
+            opacity: 0.9;
+          }
+          .bubble-button-background {
+            background-color: transparent !important;
+            opacity: 0 !important;
+          }
+          .bubble-icon-container {
+            {% set advice = states('sensor.YOUR_BEACH_NAME_swimming_advice') | lower %}
+            {% if 'suitable' in advice %}
+              {% set rgb = '40,190,100' %}
+            {% elif 'caution' in advice %}
+              {% set rgb = '255,165,0' %}
+            {% elif 'signs' in advice %}
+              {% set rgb = '66,133,244' %}
+            {% elif 'unsuitable' in advice %}
+              {% set rgb = '220,60,60' %}
+            {% else %}
+              {% set rgb = '120,120,120' %}
+            {% endif %}
+            background: rgba({{ rgb }}, 0.25) !important;
+          }
+          .bubble-icon {
+            color: rgb(255, 255, 255) !important;
+          }

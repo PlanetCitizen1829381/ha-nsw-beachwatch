@@ -1,0 +1,22 @@
+# Example Lovelace Map Card Configuration
+# Dependencies:
+#   - Home Assistant Map Card (built-in)
+#   - Beachwatch Integration (for beach swimming safety sensors)
+
+type: map  # Home Assistant standard Map Card
+entities:
+  - entity: sensor.YOUR_BEACH_NAME_1_swimming_safety  # Replace with your beach sensor
+    label_mode: state
+  - entity: sensor.YOUR_BEACH_NAME_2_swimming_safety  # Replace with your beach sensor
+    label_mode: state
+  - entity: sensor.YOUR_BEACH_NAME_3_swimming_safety  # Replace with your beach sensor
+    label_mode: state
+  - entity: sensor.YOUR_BEACH_NAME_4_swimming_safety  # Replace with your beach sensor
+    label_mode: state
+  - entity: sensor.YOUR_BEACH_NAME_5_swimming_safety  # Replace with your beach sensor
+    label_mode: state
+theme_mode: auto
+grid_options:
+  columns: full
+  rows: 6
+title: Swim Safety Map

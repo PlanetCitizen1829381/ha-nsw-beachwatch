@@ -1,0 +1,164 @@
+# Example Lovelace Card Configuration
+# Dependencies:
+#   - card-mod (https://github.com/thomasloven/lovelace-card-mod)
+#   - button-card (https://github.com/custom-cards/button-card)
+#   - Home Assistant Vertical Stack (built-in)
+#   - Home Assistant Entities Card (built-in)
+
+type: vertical-stack  # Home Assistant standard Vertical Stack
+cards:
+  - type: custom:button-card  # button-card custom card
+    entity: sensor.YOUR_BEACH_NAME_swimming_advice  # Replace with your beach sensor
+    name: Your Beach Name
+    icon: mdi:swim
+    show_state: true
+    styles:
+      card:
+        - border-radius: 12px 12px 0px 0px
+        - padding: 6px
+        - text-transform: none
+      grid:
+        - grid-template-areas: "\"i\" \"n\" \"s\" \"updated\""
+        - grid-template-columns: 1fr
+        - grid-template-rows: min-content min-content min-content min-content
+      icon:
+        - width: 30px
+        - justify-self: center
+        - margin-bottom: 2px
+        - color: "#ffffff"
+      name:
+        - font-weight: bold
+        - font-size: 1.2rem
+        - align-self: center
+        - justify-self: center
+        - margin-bottom: 2px
+      state:
+        - font-size: 1.05rem
+        - font-weight: bold
+        - justify-self: center
+        - text-align: center
+        - opacity: 0.95
+        - white-space: normal
+      custom_fields:
+        updated:
+          - font-size: 0.7rem
+          - opacity: 0.8
+          - margin-top: 4px
+          - justify-self: center
+          - text-align: center
+    custom_fields:
+      updated: |
+        [[[
+          const lastUpdate = entity.attributes.last_official_update;
+          return `<ha-icon icon="mdi:clock-outline" style="width: 12px; height: 12px; vertical-align: middle;"></ha-icon> 
+          Forecast Updated: ${lastUpdate}`
+        ]]]
+    state:
+      - operator: template
+        value: |
+          [[[ 
+            const state = entity.state ? entity.state.toLowerCase() : '';
+            return state.includes('no forecast');
+          ]]]
+        styles:
+          card:
+            - background-color: "#1a3a52"
+          icon:
+            - color: "#ffffff"
+      - operator: template
+        value: |
+          [[[ 
+            const risk = entity.attributes.risk_level ? entity.attributes.risk_level.toLowerCase() : '';
+            const state = entity.state ? entity.state.toLowerCase() : '';
+            return risk.includes('unlikely') || state.includes('unlikely');
+          ]]]
+        styles:
+          card:
+            - background-color: "#2e7d32"
+          icon:
+            - color: "#ffffff"
+      - operator: template
+        value: |
+          [[[ 
+            const risk = entity.attributes.risk_level ? entity.attributes.risk_level.toLowerCase() : '';
+            const state = entity.state ? entity.state.toLowerCase() : '';
+            return risk.includes('possible') || state.includes('possible');
+          ]]]
+        styles:
+          card:
+            - background-color: "#CC6600"
+          icon:
+            - color: "#000000"
+      - operator: template
+        value: |
+          [[[ 
+            const risk = entity.attributes.risk_level ? entity.attributes.risk_level.toLowerCase() : '';
+            const state = entity.state ? entity.state.toLowerCase() : '';
+            return risk.includes('likely') || state.includes('likely');
+          ]]]
+        styles:
+          card:
+            - background-color: "#c62828"
+          icon:
+            - color: "#ffffff"
+      - operator: template
+        value: |
+          [[[ 
+            return entity.state === 'unavailable' || entity.state === 'unknown';
+          ]]]
+        styles:
+          card:
+            - background-color: "#444444"
+          icon:
+            - color: "#888888"
+  - type: entities  # Home Assistant standard Entities Card
+    entities:
+      - type: section
+        label: Water Quality
+      - type: attribute
+        entity: sensor.YOUR_BEACH_NAME_water_quality_test  # Replace with your water quality sensor
+        attribute: water_quality_description
+        name: Advice*
+        icon: mdi:information-outline
+      - entity: sensor.YOUR_BEACH_NAME_water_quality_test  # Replace with your water quality sensor
+        name: Microbial Rating
+        icon: mdi:test-tube
+      - type: attribute
+        entity: sensor.YOUR_BEACH_NAME_water_quality_test  # Replace with your water quality sensor
+        attribute: last_sample_date
+        name: Microbial Sample
+        icon: mdi:calendar-clock
+    card_mod:  # card-mod styling for Entities Card
+      style:
+        .: |
+          ha-card {
+            --ha-card-header-font-size: 14px;
+            --mdc-icon-size: 20px;
+            border-radius: 0px !important;
+            border-bottom: none !important;
+          }
+          .card-content {
+            padding-top: 0px !important;
+            padding-bottom: 4px !important;
+          }
+  - type: custom:button-card  # button-card custom card
+    name: >-
+      *Advice based on the most recent bacterial sample date shown above.
+
+      <br><br>Guidance: At ocean beaches, avoid swimming during heavy rain, and
+      for at least one day after. At estuaries and inland waterways, avoid
+      swimming for up to three days after heavy rain. Always refer to posted
+      beach signs for additional updates.  
+    styles:
+      card:
+        - border-radius: 0px 0px 12px 12px
+        - padding: 10px
+        - background-color: var(--card-background-color)
+        - border-top: 1px solid var(--divider-color)
+      name:
+        - font-size: 0.75rem
+        - font-style: italic
+        - opacity: 0.7
+        - justify-self: center
+        - text-align: center
+        - white-space: normal

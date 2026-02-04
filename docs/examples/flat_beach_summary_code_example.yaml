@@ -1,0 +1,24 @@
+# Example Lovelace Entities Card Configuration
+# Dependencies:
+#   - Home Assistant Entities Card (built-in)
+#   - Beachwatch Integration (for beach swimming sensors)
+
+type: entities  # Home Assistant standard Entities Card
+entities:
+  - entity: sensor.YOUR_BEACH_NAME_swimming_advice  # Replace with your beach sensor
+    name: Advice
+  - entity: sensor.YOUR_BEACH_NAME_swimming_safety  # Replace with your beach sensor
+    name: Safety Status
+  - entity: sensor.YOUR_BEACH_NAME_water_quality_test  # Replace with your water quality sensor
+    name: Water Quality
+  - type: attribute
+    entity: sensor.YOUR_BEACH_NAME_water_quality_test  # Replace with your water quality sensor
+    attribute: enterococci_level
+    name: Bacteria Level
+    icon: mdi:test-tube
+  - type: attribute
+    entity: sensor.YOUR_BEACH_NAME_water_quality_test  # Replace with your water quality sensor
+    attribute: last_sample_date
+    name: Last Sample Date
+    icon: mdi:calendar
+title: Your Beach Name Conditions
