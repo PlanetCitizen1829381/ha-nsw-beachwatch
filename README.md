@@ -314,8 +314,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - **NSW Department of Planning and Environment** - For providing the Beachwatch API and data
-- **Home Assistant Community** - For the integration framework and support
-- **HACS** - For making custom integrations easy to install
 
 ---
 
@@ -328,3 +326,4 @@ Made with ❤️ for the Home Assistant community
 [![Star this repository](https://img.shields.io/github/stars/PlanetCitizen1829381/ha-nsw-beachwatch?style=social)](https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/stargazers)
 
 </div>
+
