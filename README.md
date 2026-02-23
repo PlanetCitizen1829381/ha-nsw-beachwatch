@@ -7,9 +7,9 @@
 🌊 Real-time water quality forecasts and swimming safety advice for New South Wales beaches
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge)](https://hacs.xyz/)
-[![GitHub Release](https://img.shields.io/github/release/PlanetCitizen1829381/ha-nsw-beachwatch.svg?style=for-the-badge)](https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/PlanetCitizen1829381/ha-nsw-beachwatch?style=for-the-badge)](https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/releases)
 [![License](https://img.shields.io/github/license/PlanetCitizen1829381/ha-nsw-beachwatch.svg?style=for-the-badge)](LICENSE)
-[![Validate](https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/actions/workflows/validate.yaml/badge.svg)](https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/actions/workflows/validate.yaml)
+[![Validate](https://img.shields.io/github/actions/workflow/status/PlanetCitizen1829381/ha-nsw-beachwatch/validate.yaml?branch=main&style=for-the-badge&label=Validate)](https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/actions/workflows/validate.yaml)
 
 [Features](#-features) • [Installation](#-installation) • [Configuration](#%EF%B8%8F-configuration) • [Sensors](#-sensors) • [Examples](#-dashboard-examples) • [Support](#-support)
 
@@ -326,5 +326,6 @@ Made with ❤️ for the Home Assistant community
 [![Star this repository](https://img.shields.io/github/stars/PlanetCitizen1829381/ha-nsw-beachwatch?style=social)](https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/stargazers)
 
 </div>
+
 
 
