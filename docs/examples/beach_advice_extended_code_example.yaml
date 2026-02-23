@@ -118,7 +118,7 @@ cards:
       - type: attribute
         entity: sensor.YOUR_BEACH_NAME_water_quality_test  # Replace with your water quality sensor
         attribute: water_quality_description
-        name: Advice*
+        name: Info*
         icon: mdi:information-outline
       - entity: sensor.YOUR_BEACH_NAME_water_quality_test  # Replace with your water quality sensor
         name: Microbial Rating
@@ -143,7 +143,7 @@ cards:
           }
   - type: custom:button-card  # button-card custom card
     name: >-
-      *Advice based on the most recent bacterial sample date shown above.
+      *Info based on the most recent bacterial sample date shown above.
 
       <br><br>Guidance: At ocean beaches, avoid swimming during heavy rain, and
       for at least one day after. At estuaries and inland waterways, avoid
