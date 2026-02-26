@@ -13,7 +13,7 @@ from .coordinator import NSWBeachwatchDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[str] = ["sensor"]
+PLATFORMS: list[str] = ["sensor", "binary_sensor"]
 
 
 async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
