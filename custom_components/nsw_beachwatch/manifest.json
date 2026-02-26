@@ -4,7 +4,7 @@
   "codeowners": ["@PlanetCitizen1829381"],
   "config_flow": true,
   "documentation": "https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch",
-  "integration_type": "service",
+  "integration_type": "hub",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/issues",
   "requirements": [],
