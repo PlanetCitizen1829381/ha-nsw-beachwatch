@@ -8,5 +8,6 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/issues",
   "requirements": [],
-  "version": "1.2.0"
+  "version": "1.2.0",
+  "after_dependencies": ["sensor", "binary_sensor"]
 }
