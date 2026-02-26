@@ -1,19 +1,21 @@
 """The NSW Beachwatch integration."""
 from __future__ import annotations
 
+from datetime import timedelta
 import logging
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.exceptions import ConfigEntryNotReady
 
+from .api import NSWBeachwatchAPI
 from .const import DOMAIN
-from .coordinator import NSWBeachwatchDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[str] = ["sensor", "binary_sensor"]
+PLATFORMS: list[str] = ["sensor"]
 
 
 async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
@@ -23,10 +25,28 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up NSW Beachwatch from a config entry."""
-
+    api = NSWBeachwatchAPI(hass)
     beach_name = entry.data.get("beach_name")
+    update_interval = entry.options.get("update_interval", 120)
 
-    coordinator = NSWBeachwatchDataUpdateCoordinator(hass, beach_name)
+    async def async_update_data():
+        """Fetch data from API."""
+        try:
+            data = await api.get_beach_status(beach_name)
+            if data is None:
+                raise UpdateFailed(f"Unable to fetch data for {beach_name}")
+            return data
+        except Exception as err:
+            _LOGGER.error(f"Error fetching Beachwatch data for {beach_name}: {err}")
+            raise UpdateFailed(f"Error communicating with API: {err}")
+
+    coordinator = DataUpdateCoordinator(
+        hass,
+        _LOGGER,
+        name=f"Beachwatch {beach_name}",
+        update_method=async_update_data,
+        update_interval=timedelta(minutes=update_interval),
+    )
 
     try:
         await coordinator.async_config_entry_first_refresh()
@@ -39,7 +59,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     entry.async_on_unload(entry.add_update_listener(update_listener))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-
+    
     _LOGGER.info(f"Successfully initialized NSW Beachwatch for {beach_name}")
     return True
 
