@@ -95,23 +95,6 @@
             "name": "Attribution"
           }
         }
-      },
-      "pollution_alerts": {
-        "name": "Pollution Alerts",
-        "state_attributes": {
-          "alert_count": {
-            "name": "Alert Count"
-          },
-          "region": {
-            "name": "Region"
-          },
-          "council": {
-            "name": "Council"
-          },
-          "attribution": {
-            "name": "Attribution"
-          }
-        }
       }
     }
   }
