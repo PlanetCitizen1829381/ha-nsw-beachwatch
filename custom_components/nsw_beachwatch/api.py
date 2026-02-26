@@ -1,4 +1,4 @@
-"""Enhanced NSW Beachwatch API with pollution alerts."""
+"""NSW Beachwatch API client with pollution alerts support."""
 import logging
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
@@ -6,7 +6,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class NSWBeachwatchAPI:
-    """NSW Beachwatch API client with pollution alerts support."""
+    """NSW Beachwatch API client."""
 
     def __init__(self, hass):
         """Initialize the API client."""
@@ -35,15 +35,14 @@ class NSWBeachwatchAPI:
                     if name:
                         beaches.append(name)
                 return sorted(list(set(beaches)))
-        except Exception as err:
-            _LOGGER.error(f"Error fetching beach list: {err}")
+        except Exception:
             return []
 
     async def get_beach_status(self, beach_name):
         """Get comprehensive beach status including pollution alerts."""
         session = async_get_clientsession(self.hass)
 
-        # First, get basic data from GeoJSON endpoint to get site ID
+        # Get basic data from GeoJSON endpoint
         url = f"{self.base_url}/geojson?site_name={beach_name.replace(' ', '%20')}"
         try:
             async with session.get(url, headers=self.headers, timeout=15) as response:
@@ -58,7 +57,7 @@ class NSWBeachwatchAPI:
                 geometry = feature.get("geometry", {})
                 coordinates = geometry.get("coordinates", [None, None])
 
-                # Extract site ID - try multiple possible fields
+                # Extract site ID
                 site_id = (
                     feature.get("id") or
                     properties.get("id") or
@@ -88,20 +87,18 @@ class NSWBeachwatchAPI:
                     "sample_date": properties.get("latestResultObservationDate"),
                     "latitude": coordinates[1],
                     "longitude": coordinates[0],
-                    "alerts": [],  # Initialize empty
+                    "alerts": [],
                     "water_temp": None,
                     "annual_grade": None,
                     "region": None,
                     "council": None
                 }
 
-                # Try to get detailed information including alerts
+                # Get detailed information including alerts
                 if site_id:
                     details = await self._get_site_details(site_id)
                     if details:
-                        # Add pollution alerts
                         beach_data["alerts"] = details.get("Alerts", [])
-                        # Add additional useful data
                         beach_data["water_temp"] = details.get("WaterTemp")
                         beach_data["annual_grade"] = details.get("AnnualGrade")
                         beach_data["region"] = details.get("Region")
@@ -116,7 +113,6 @@ class NSWBeachwatchAPI:
     async def _get_site_details(self, site_id):
         """Get detailed site information including pollution alerts."""
         session = async_get_clientsession(self.hass)
-
         url = f"{self.base_url}/{site_id}"
 
         try:
@@ -124,10 +120,7 @@ class NSWBeachwatchAPI:
                 if response.status != 200:
                     _LOGGER.debug(f"Site details not available for {site_id}")
                     return None
-
-                data = await response.json()
-                return data
-
+                return await response.json()
         except Exception as e:
             _LOGGER.debug(f"Could not fetch site details for {site_id}: {e}")
             return None
