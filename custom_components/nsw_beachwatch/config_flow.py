@@ -9,7 +9,7 @@ class NswBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     async def async_step_user(self, user_input=None):
-        api = NSWBeachwatchAPI(self.hass)
+        api = NSWBeachwatchAPI()
         beaches = await api.get_all_beaches()
         
         if not beaches:
@@ -48,6 +48,6 @@ class NswBeachwatchOptionsFlowHandler(config_entries.OptionsFlow):
                 vol.Optional(
                     "update_interval", 
                     default=self.config_entry.options.get("update_interval", 120)
-                ): vol.All(vol.Coerce(int), vol.Range(min=1, max=1440)),
-            }),
+                ): vol.All(vol.Coerce(int), vol.Range(min=5, max=1440)),
+            })
         )
