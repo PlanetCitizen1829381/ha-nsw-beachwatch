@@ -11,18 +11,22 @@ _LOGGER = logging.getLogger(__name__)
 
 STAR_RATING_MAP = {
     4: {
+        "state": "Good",
         "range": "<41 cfu/100mL",
         "description": "Good - bacterial levels are safe for bathing"
     },
     3: {
+        "state": "Fair",
         "range": "41-200 cfu/100mL",
         "description": "Fair - bacterial levels indicate an increased risk of illness to bathers - particularly vulnerable persons"
     },
     2: {
+        "state": "Poor",
         "range": "201-500 cfu/100mL",
         "description": "Poor - bacterial levels indicate a substantially increased risk of illness to bathers"
     },
     1: {
+        "state": "Bad",
         "range": ">500 cfu/100mL",
         "description": "Bad - bacterial levels indicate a significant risk of illness to bathers"
     }
@@ -92,7 +96,7 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
             configuration_url="https://www.beachwatch.nsw.gov.au"
         )
 
-        # Set default icons
+        # Set default icons (overridden dynamically for swimming_safety and pollution_alerts)
         if key == "advice":
             self._attr_icon = "mdi:swim"
         elif key == "latest_results":
@@ -101,23 +105,25 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
             self._attr_icon = "mdi:chart-line"
         elif key == "pollution_alerts":
             self._attr_icon = "mdi:alert-circle-outline"
+        elif key == "swimming_safety":
+            self._attr_icon = "mdi:shield-off-outline"
 
     @property
     def icon(self):
         """Return the icon to use in the frontend."""
+        data = self.coordinator.data
+
         if self._key == "swimming_safety":
-            data = self.coordinator.data
             if data:
-                forecast = str(data.get("forecast", "Unknown")).lower()
+                forecast = str(data.get("forecast", "")).lower()
                 return ADVICE_MAP.get(forecast, {}).get("icon", "mdi:shield-off-outline")
+            return "mdi:shield-off-outline"
 
         if self._key == "pollution_alerts":
-            data = self.coordinator.data
             if data:
                 alerts = data.get("alerts", [])
-                if alerts:
-                    return "mdi:alert-circle"
-                return "mdi:check-circle"
+                return "mdi:alert-circle" if alerts else "mdi:check-circle"
+            return "mdi:alert-circle-outline"
 
         return self._attr_icon
 
@@ -135,7 +141,7 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
         if not data:
             return None
 
-        forecast = str(data.get("forecast", "Unknown")).lower()
+        forecast = str(data.get("forecast", "")).lower()
 
         if self._key == "swimming_safety":
             return ADVICE_MAP.get(forecast, {}).get("safety", "Unknown")
@@ -144,8 +150,14 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
             return ADVICE_MAP.get(forecast, {}).get("state", "Check local signs.")
 
         if self._key == "latest_results":
-            result = data.get("latest_result")
-            return result if result else "Awaiting Lab Results"
+            stars = data.get("stars")
+            if stars is not None:
+                try:
+                    stars_int = int(stars)
+                    return STAR_RATING_MAP.get(stars_int, {}).get("state", "Awaiting Lab Results")
+                except (ValueError, TypeError):
+                    pass
+            return "Awaiting Lab Results"
 
         if self._key == "water_quality_rating":
             return data.get("stars")
@@ -155,9 +167,7 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
             if not alerts:
                 return "No Active Warnings"
             alert_count = len(alerts)
-            if alert_count == 1:
-                return "1 Active Warning"
-            return f"{alert_count} Active Warnings"
+            return "1 Active Warning" if alert_count == 1 else f"{alert_count} Active Warnings"
 
         return None
 
@@ -176,7 +186,7 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
                 attrs["latitude"] = float(lat)
                 attrs["longitude"] = float(lon)
 
-            forecast = str(data.get("forecast", "Unknown")).lower()
+            forecast = str(data.get("forecast", "")).lower()
             advice_info = ADVICE_MAP.get(forecast, {})
             attrs["risk_level"] = advice_info.get("risk", "Unknown")
             attrs["risk_meaning"] = advice_info.get("details", "Check for signs of pollution.")
@@ -198,28 +208,37 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
                     attrs["last_official_update"] = f"{day} {month} {year} {hour}:{minute}:{second} {period}"
 
         if self._key == "latest_results":
-            bacteria = data.get("bacteria")
             stars = data.get("stars")
+            bacteria = data.get("bacteria")
 
-            if bacteria is not None:
+            # Always populate enterococci_level and water_quality_description from star rating
+            if stars is not None:
                 try:
-                    bacteria_num = float(bacteria)
-                    attrs["enterococci_level"] = f"{bacteria_num} cfu/100mL"
+                    stars_int = int(stars)
+                    rating_info = STAR_RATING_MAP.get(stars_int, {})
+                    # If we have an actual bacteria count from the API, use that; otherwise use the range
+                    if bacteria is not None:
+                        try:
+                            bacteria_num = float(bacteria)
+                            attrs["enterococci_level"] = f"{bacteria_num} cfu/100mL"
+                        except (ValueError, TypeError):
+                            attrs["enterococci_level"] = rating_info.get("range", "Not available")
+                    else:
+                        attrs["enterococci_level"] = rating_info.get("range", "Not available")
+                    attrs["water_quality_description"] = rating_info.get("description", "Not available")
                 except (ValueError, TypeError):
-                    attrs["enterococci_level"] = str(bacteria)
-            elif stars is not None and stars in STAR_RATING_MAP:
-                rating_info = STAR_RATING_MAP[stars]
-                attrs["enterococci_level"] = rating_info["range"]
-                attrs["water_quality_description"] = rating_info["description"]
+                    attrs["enterococci_level"] = "Not available"
+                    attrs["water_quality_description"] = "Not available"
             else:
                 attrs["enterococci_level"] = "Not available"
+                attrs["water_quality_description"] = "Not available"
 
             raw_date = data.get("sample_date")
             if raw_date:
                 try:
                     date_obj = datetime.fromisoformat(raw_date.replace('Z', '+00:00'))
                     attrs["last_sample_date"] = date_obj.strftime("%d %B %Y")
-                except:
+                except Exception:
                     attrs["last_sample_date"] = raw_date.split("T")[0]
 
         if self._key == "pollution_alerts":
@@ -238,7 +257,7 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
                         try:
                             dt = datetime.fromisoformat(last_updated.replace('+00:00', '+00:00'))
                             attrs[f"{prefix}_last_updated"] = dt.strftime("%d %B %Y %I:%M %p")
-                        except:
+                        except Exception:
                             attrs[f"{prefix}_last_updated"] = last_updated
 
                     url = alert.get("Url")
