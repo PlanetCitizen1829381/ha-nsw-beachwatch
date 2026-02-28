@@ -68,7 +68,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
         BeachwatchSensor(coordinator, entry, "advice"),
         BeachwatchSensor(coordinator, entry, "latest_results"),
         BeachwatchSensor(coordinator, entry, "water_quality_rating"),
-        BeachwatchSensor(coordinator, entry, "pollution_alerts"),
     ]
     async_add_entities(sensors)
 
@@ -92,15 +91,12 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
             configuration_url="https://www.beachwatch.nsw.gov.au"
         )
 
-        # Set default icons
         if key == "advice":
             self._attr_icon = "mdi:swim"
         elif key == "latest_results":
             self._attr_icon = "mdi:microscope"
         elif key == "water_quality_rating":
             self._attr_icon = "mdi:chart-line"
-        elif key == "pollution_alerts":
-            self._attr_icon = "mdi:alert-circle-outline"
 
     @property
     def icon(self):
@@ -110,15 +106,6 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
             if data:
                 forecast = str(data.get("forecast", "Unknown")).lower()
                 return ADVICE_MAP.get(forecast, {}).get("icon", "mdi:shield-off-outline")
-
-        if self._key == "pollution_alerts":
-            data = self.coordinator.data
-            if data:
-                alerts = data.get("alerts", [])
-                if alerts:
-                    return "mdi:alert-circle"
-                return "mdi:check-circle"
-
         return self._attr_icon
 
     @property
@@ -150,15 +137,6 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
         if self._key == "water_quality_rating":
             return data.get("stars")
 
-        if self._key == "pollution_alerts":
-            alerts = data.get("alerts", [])
-            if not alerts:
-                return "No Active Warnings"
-            alert_count = len(alerts)
-            if alert_count == 1:
-                return "1 Active Warning"
-            return f"{alert_count} Active Warnings"
-
         return None
 
     @property
@@ -173,8 +151,8 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
             lat = data.get("latitude")
             lon = data.get("longitude")
             if lat is not None and lon is not None:
-                attrs["latitude"] = float(lat)
-                attrs["longitude"] = float(lon)
+                attrs["beach_latitude"] = float(lat)
+                attrs["beach_longitude"] = float(lon)
 
             forecast = str(data.get("forecast", "Unknown")).lower()
             advice_info = ADVICE_MAP.get(forecast, {})
@@ -221,36 +199,6 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
                     attrs["last_sample_date"] = date_obj.strftime("%d %B %Y")
                 except:
                     attrs["last_sample_date"] = raw_date.split("T")[0]
-
-        if self._key == "pollution_alerts":
-            alerts = data.get("alerts", [])
-            attrs["alert_count"] = len(alerts)
-
-            if alerts:
-                for idx, alert in enumerate(alerts, 1):
-                    prefix = f"alert_{idx}"
-                    attrs[f"{prefix}_type"] = alert.get("Type", "Warning")
-                    attrs[f"{prefix}_text"] = alert.get("Text", "")
-                    attrs[f"{prefix}_source"] = alert.get("Source", "Beachwatch")
-
-                    last_updated = alert.get("LastUpdated")
-                    if last_updated:
-                        try:
-                            dt = datetime.fromisoformat(last_updated.replace('+00:00', '+00:00'))
-                            attrs[f"{prefix}_last_updated"] = dt.strftime("%d %B %Y %I:%M %p")
-                        except:
-                            attrs[f"{prefix}_last_updated"] = last_updated
-
-                    url = alert.get("Url")
-                    if url:
-                        attrs[f"{prefix}_url"] = url
-
-            region = data.get("region")
-            council = data.get("council")
-            if region:
-                attrs["region"] = region
-            if council:
-                attrs["council"] = council
 
         attrs["attribution"] = "Data provided by NSW Beachwatch"
         return attrs
