@@ -5,11 +5,11 @@
 #   - Home Assistant Vertical Stack (built-in)
 #   - Home Assistant Entities Card (built-in)
 
-type: vertical-stack  # Home Assistant standard Vertical Stack
+type: vertical-stack
 cards:
-  - type: custom:button-card  # button-card custom card
+  - type: custom:button-card
     entity: sensor.YOUR_BEACH_NAME_swimming_advice  # Replace with your beach sensor
-    name: Your Beach Name
+    name: Your Beach Name # Replace with your beach name
     icon: mdi:swim
     show_state: true
     styles:
@@ -111,7 +111,7 @@ cards:
             - background-color: "#444444"
           icon:
             - color: "#888888"
-  - type: entities  # Home Assistant standard Entities Card
+  - type: entities
     entities:
       - type: section
         label: Water Quality
@@ -120,7 +120,9 @@ cards:
         attribute: water_quality_description
         name: Info*
         icon: mdi:information-outline
-      - entity: sensor.YOUR_BEACH_NAME_water_quality_test  # Replace with your water quality sensor
+      - type: attribute
+        entity: sensor.YOUR_BEACH_NAME_water_quality_test  # Replace with your water quality sensor
+        attribute: enterococci_level
         name: Microbial Rating
         icon: mdi:test-tube
       - type: attribute
@@ -128,7 +130,7 @@ cards:
         attribute: last_sample_date
         name: Microbial Sample
         icon: mdi:calendar-clock
-    card_mod:  # card-mod styling for Entities Card
+    card_mod:
       style:
         .: |
           ha-card {
@@ -141,7 +143,7 @@ cards:
             padding-top: 0px !important;
             padding-bottom: 4px !important;
           }
-  - type: custom:button-card  # button-card custom card
+  - type: custom:button-card
     name: >-
       *Info based on the most recent bacterial sample date shown above.
 
@@ -162,3 +164,4 @@ cards:
         - justify-self: center
         - text-align: center
         - white-space: normal
+
