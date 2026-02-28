@@ -43,12 +43,6 @@
           "longitude": {
             "name": "Longitude"
           },
-          "region": {
-            "name": "Region"
-          },
-          "council": {
-            "name": "Council"
-          },
           "attribution": {
             "name": "Attribution"
           }
@@ -72,12 +66,6 @@
           "longitude": {
             "name": "Longitude"
           },
-          "region": {
-            "name": "Region"
-          },
-          "council": {
-            "name": "Council"
-          },
           "attribution": {
             "name": "Attribution"
           }
@@ -95,12 +83,6 @@
           "last_sample_date": {
             "name": "Last Sample Date"
           },
-          "region": {
-            "name": "Region"
-          },
-          "council": {
-            "name": "Council"
-          },
           "attribution": {
             "name": "Attribution"
           }
@@ -109,27 +91,16 @@
       "water_quality_rating": {
         "name": "Water Quality History",
         "state_attributes": {
-          "region": {
-            "name": "Region"
-          },
-          "council": {
-            "name": "Council"
-          },
           "attribution": {
             "name": "Attribution"
           }
         }
-      }
-    },
-    "binary_sensor": {
-      "safe_to_swim": {
-        "name": "Safe to Swim",
+      },
+      "pollution_alerts": {
+        "name": "Pollution Alerts",
         "state_attributes": {
-          "forecast": {
-            "name": "Forecast"
-          },
-          "risk_level": {
-            "name": "Risk Level"
+          "alert_count": {
+            "name": "Alert Count"
           },
           "region": {
             "name": "Region"
