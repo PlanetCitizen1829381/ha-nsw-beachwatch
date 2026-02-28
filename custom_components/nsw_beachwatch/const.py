@@ -1,3 +1,4 @@
+"""Constants for NSW Beachwatch integration."""
 DOMAIN = "nsw_beachwatch"
 NAME = "NSW Beachwatch"
 MANUFACTURER = "@PlanetCitizen1829381"
