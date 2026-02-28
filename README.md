@@ -140,7 +140,7 @@ Each beach provides 4 sensors:
 - Risk Meaning
 - Last Official Update
 - Latitude / Longitude
-
+Please note, attributes are located in the Developer Tools > States
 ---
 
 ### 2. 🏊 Swimming Advice
@@ -157,6 +157,7 @@ Each beach provides 4 sensors:
 - Risk Meaning
 - Last Official Update
 - Latitude / Longitude
+Please note, attributes are located in the Developer Tools > States
 
 ---
 
@@ -168,7 +169,7 @@ Each beach provides 4 sensors:
 - **Water Quality Description** - Official NSW interpretation
 - **Last Sample Date** - When water was tested
 
-**Note:** Tests for water quality can take 2-4 days be processed & published. As such, the results will always be in the past.
+**Note:** Tests for water quality can take 2-4 days be processed & published. As such, the results will always be in the past. Attributes are located in the Developer Tools > States
 
 #### Star Rating to Bacteria Mapping
 
@@ -327,6 +328,7 @@ Made with ❤️ for the Home Assistant community
 [![Star this repository](https://img.shields.io/github/stars/PlanetCitizen1829381/ha-nsw-beachwatch?style=social)](https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/stargazers)
 
 </div>
+
 
 
 
