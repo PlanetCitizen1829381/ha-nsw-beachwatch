@@ -264,12 +264,6 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
                     if url:
                         attrs[f"{prefix}_url"] = url
 
-            region = data.get("region")
-            council = data.get("council")
-            if region:
-                attrs["region"] = region
-            if council:
-                attrs["council"] = council
 
         attrs["attribution"] = "Data provided by NSW Beachwatch"
         return attrs
