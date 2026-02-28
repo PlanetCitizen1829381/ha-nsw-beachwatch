@@ -37,10 +37,10 @@
           "last_official_update": {
             "name": "Last Official Update"
           },
-          "latitude": {
+          "beach_latitude": {
             "name": "Latitude"
           },
-          "longitude": {
+          "beach_longitude": {
             "name": "Longitude"
           },
           "attribution": {
@@ -60,10 +60,10 @@
           "last_official_update": {
             "name": "Last Official Update"
           },
-          "latitude": {
+          "beach_latitude": {
             "name": "Latitude"
           },
-          "longitude": {
+          "beach_longitude": {
             "name": "Longitude"
           },
           "attribution": {
@@ -91,23 +91,6 @@
       "water_quality_rating": {
         "name": "Water Quality History",
         "state_attributes": {
-          "attribution": {
-            "name": "Attribution"
-          }
-        }
-      },
-      "pollution_alerts": {
-        "name": "Pollution Alerts",
-        "state_attributes": {
-          "alert_count": {
-            "name": "Alert Count"
-          },
-          "region": {
-            "name": "Region"
-          },
-          "council": {
-            "name": "Council"
-          },
           "attribution": {
             "name": "Attribution"
           }
