@@ -37,10 +37,10 @@
           "last_official_update": {
             "name": "Last Official Update"
           },
-          "beach_latitude": {
+          "latitude": {
             "name": "Latitude"
           },
-          "beach_longitude": {
+          "longitude": {
             "name": "Longitude"
           },
           "attribution": {
@@ -60,10 +60,10 @@
           "last_official_update": {
             "name": "Last Official Update"
           },
-          "beach_latitude": {
+          "latitude": {
             "name": "Latitude"
           },
-          "beach_longitude": {
+          "longitude": {
             "name": "Longitude"
           },
           "attribution": {
