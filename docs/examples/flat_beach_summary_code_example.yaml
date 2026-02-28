@@ -21,4 +21,4 @@ entities:
     attribute: last_sample_date
     name: Last Sample Date
     icon: mdi:calendar
-title: Your Beach Name Conditions
+title: Your Beach Name Conditions # Replace with your Beach Name
