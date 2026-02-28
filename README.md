@@ -220,7 +220,7 @@ Compact view showing essential swimming safety information.
 
 Display comprehensive swimming advice with all safety information.
 
-![Extended Advice Example](images/NSWBW_Advice_Extende_Example.png)
+![Extended Advice Example](images/NSWBW_Advice_Ext_Example.png)
 
 **Code Example:** [beach_advice_extended_code_example.yaml](docs/examples/beach_advice_extended_code_example.yaml)
 
@@ -327,6 +327,7 @@ Made with ❤️ for the Home Assistant community
 [![Star this repository](https://img.shields.io/github/stars/PlanetCitizen1829381/ha-nsw-beachwatch?style=social)](https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/stargazers)
 
 </div>
+
 
 
 
