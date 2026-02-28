@@ -72,7 +72,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
         BeachwatchSensor(coordinator, entry, "advice"),
         BeachwatchSensor(coordinator, entry, "latest_results"),
         BeachwatchSensor(coordinator, entry, "water_quality_rating"),
-        BeachwatchSensor(coordinator, entry, "pollution_alerts"),
     ]
     async_add_entities(sensors)
 
@@ -96,15 +95,12 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
             configuration_url="https://www.beachwatch.nsw.gov.au"
         )
 
-        # Set default icons (overridden dynamically for swimming_safety and pollution_alerts)
         if key == "advice":
             self._attr_icon = "mdi:swim"
         elif key == "latest_results":
             self._attr_icon = "mdi:microscope"
         elif key == "water_quality_rating":
             self._attr_icon = "mdi:chart-line"
-        elif key == "pollution_alerts":
-            self._attr_icon = "mdi:alert-circle-outline"
         elif key == "swimming_safety":
             self._attr_icon = "mdi:shield-off-outline"
 
@@ -118,12 +114,6 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
                 forecast = str(data.get("forecast", "")).lower()
                 return ADVICE_MAP.get(forecast, {}).get("icon", "mdi:shield-off-outline")
             return "mdi:shield-off-outline"
-
-        if self._key == "pollution_alerts":
-            if data:
-                alerts = data.get("alerts", [])
-                return "mdi:alert-circle" if alerts else "mdi:check-circle"
-            return "mdi:alert-circle-outline"
 
         return self._attr_icon
 
@@ -161,13 +151,6 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
 
         if self._key == "water_quality_rating":
             return data.get("stars")
-
-        if self._key == "pollution_alerts":
-            alerts = data.get("alerts", [])
-            if not alerts:
-                return "No Active Warnings"
-            alert_count = len(alerts)
-            return "1 Active Warning" if alert_count == 1 else f"{alert_count} Active Warnings"
 
         return None
 
@@ -211,12 +194,10 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
             stars = data.get("stars")
             bacteria = data.get("bacteria")
 
-            # Always populate enterococci_level and water_quality_description from star rating
             if stars is not None:
                 try:
                     stars_int = int(stars)
                     rating_info = STAR_RATING_MAP.get(stars_int, {})
-                    # If we have an actual bacteria count from the API, use that; otherwise use the range
                     if bacteria is not None:
                         try:
                             bacteria_num = float(bacteria)
@@ -240,30 +221,6 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
                     attrs["last_sample_date"] = date_obj.strftime("%d %B %Y")
                 except Exception:
                     attrs["last_sample_date"] = raw_date.split("T")[0]
-
-        if self._key == "pollution_alerts":
-            alerts = data.get("alerts", [])
-            attrs["alert_count"] = len(alerts)
-
-            if alerts:
-                for idx, alert in enumerate(alerts, 1):
-                    prefix = f"alert_{idx}"
-                    attrs[f"{prefix}_type"] = alert.get("Type", "Warning")
-                    attrs[f"{prefix}_text"] = alert.get("Text", "")
-                    attrs[f"{prefix}_source"] = alert.get("Source", "Beachwatch")
-
-                    last_updated = alert.get("LastUpdated")
-                    if last_updated:
-                        try:
-                            dt = datetime.fromisoformat(last_updated.replace('+00:00', '+00:00'))
-                            attrs[f"{prefix}_last_updated"] = dt.strftime("%d %B %Y %I:%M %p")
-                        except Exception:
-                            attrs[f"{prefix}_last_updated"] = last_updated
-
-                    url = alert.get("Url")
-                    if url:
-                        attrs[f"{prefix}_url"] = url
-
 
         attrs["attribution"] = "Data provided by NSW Beachwatch"
         return attrs
