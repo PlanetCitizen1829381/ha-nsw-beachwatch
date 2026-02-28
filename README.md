@@ -11,7 +11,7 @@
 [![License](https://img.shields.io/github/license/PlanetCitizen1829381/ha-nsw-beachwatch.svg?style=for-the-badge)](LICENSE)
 [![Validate](https://img.shields.io/github/actions/workflow/status/PlanetCitizen1829381/ha-nsw-beachwatch/validate.yaml?branch=main&style=for-the-badge&label=Validate)](https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/actions/workflows/validate.yaml)
 
-[Features](#-features) • [Installation](#-installation) • [Configuration](#%EF%B8%8F-configuration) • [Sensors](#-sensors) • [Examples](#-dashboard-examples) • [Support](#-support)
+[Features](#-features) • [Installation](#-installation) • [Configuration](#%EF%B8%8F-configuration) • [Sensors](#-sensors) • [Dashboard Examples](#-dashboard-examples) • [Support](#-support)
 
 </div>
 
@@ -326,6 +326,7 @@ Made with ❤️ for the Home Assistant community
 [![Star this repository](https://img.shields.io/github/stars/PlanetCitizen1829381/ha-nsw-beachwatch?style=social)](https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/stargazers)
 
 </div>
+
 
 
 
