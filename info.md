@@ -4,11 +4,13 @@
 
 ## Features
 
-- **Real-time Pollution Forecasts** - Daily predictions based on rainfall and pollution events
-- **Laboratory Water Quality Results** - Bacterial testing results with safety ratings
-- **4 Sensors Per Beach** - Swimming Safety, Swimming Advice, Water Quality Test, and Water Quality History
+- **Pollution Forecasts** - Daily predictions based on rainfall and pollution events
+- **Laboratory Water Quality Results** - Bacterial testing with safety ratings (1-5 stars)
+- **4 Sensors Per Beach** - Comprehensive monitoring for each location
 - **Dynamic Safety Icons** - Visual indicators that change based on conditions
-- **Smart Bacteria Mapping** - Converts star ratings to meaningful enterococci ranges
+- **GPS Coordinates** - Location data for map integrations
+- **Smart Bacteria Mapping** - Converts star ratings to enterococci ranges
+- **200+ NSW Beaches** - Extensive coverage across New South Wales
 
 ## Sensors
 
@@ -46,7 +48,7 @@ Each beach provides:
 | ⭐⭐ | 201-500 cfu/100mL | Poor - substantial risk |
 | ⭐ | >500 cfu/100mL | Bad - significant risk |
 
-## Attributes Available
+## Attributes Available (Developer Tools > State)
 
 - Risk Level & Meaning
 - GPS Coordinates (latitude/longitude)
