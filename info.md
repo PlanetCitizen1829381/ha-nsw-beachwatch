@@ -48,7 +48,7 @@ Each beach provides:
 | ⭐⭐ | 201-500 cfu/100mL | Poor - substantial risk |
 | ⭐ | >500 cfu/100mL | Bad - significant risk |
 
-## Attributes Available (Developer Tools > State)
+## Attributes Available in the overflow menu of the sensor and in Developer Tools > State
 
 - Risk Level & Meaning
 - GPS Coordinates (latitude/longitude)
