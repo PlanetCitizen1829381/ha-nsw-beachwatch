@@ -157,9 +157,6 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
             lat = data.get("latitude")
             lon = data.get("longitude")
             if lat is not None and lon is not None:
-                attrs["beach_latitude"] = float(lat)
-                attrs["beach_longitude"] = float(lon)
-                # Required for HA map card to plot this entity
                 attrs["latitude"] = float(lat)
                 attrs["longitude"] = float(lon)
 
