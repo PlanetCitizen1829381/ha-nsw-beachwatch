@@ -1,5 +1,10 @@
+"""The NSW Beachwatch integration."""
+from __future__ import annotations
+
 from datetime import timedelta
 import logging
+from typing import Any
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -10,14 +15,22 @@ from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = ["sensor"]
+PLATFORMS: list[str] = ["sensor"]
+
+
+async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
+    """Set up the NSW Beachwatch component."""
+    return True
+
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up NSW Beachwatch from a config entry."""
     api = NSWBeachwatchAPI(hass)
     beach_name = entry.data.get("beach_name")
     update_interval = entry.options.get("update_interval", 120)
 
     async def async_update_data():
+        """Fetch data from API."""
         try:
             data = await api.get_beach_status(beach_name)
             if data is None:
@@ -50,10 +63,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _LOGGER.info(f"Successfully initialized NSW Beachwatch for {beach_name}")
     return True
 
-async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
+
+async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Handle options update."""
     await hass.config_entries.async_reload(entry.entry_id)
 
+
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
