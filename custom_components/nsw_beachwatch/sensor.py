@@ -1,141 +1,256 @@
-"""Sensor platform for NSW Beachwatch."""
-from __future__ import annotations
-
+"""NSW Beachwatch sensors."""
 import logging
-from datetime import datetime
-
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.util import dt as dt_util
-
-from .const import DOMAIN
+from datetime import datetime
+from .const import DOMAIN, MANUFACTURER, MODEL
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORM_NAME = "NSW Beachwatch"
-MANUFACTURER = "NSW Government"
-MODEL = "Beachwatch API"
+STAR_RATING_MAP = {
+    4: {
+        "range": "<41 cfu/100mL",
+        "description": "Good - bacterial levels are safe for bathing"
+    },
+    3: {
+        "range": "41-200 cfu/100mL",
+        "description": "Fair - bacterial levels indicate an increased risk of illness to bathers - particularly vulnerable persons"
+    },
+    2: {
+        "range": "201-500 cfu/100mL",
+        "description": "Poor - bacterial levels indicate a substantially increased risk of illness to bathers"
+    },
+    1: {
+        "range": ">500 cfu/100mL",
+        "description": "Bad - bacterial levels indicate a significant risk of illness to bathers"
+    }
+}
+
+ADVICE_MAP = {
+    "unlikely": {
+        "state": "Water quality is suitable for swimming. Enjoy a swim!",
+        "risk": "Pollution Unlikely",
+        "details": "Microbial levels are expected to be within safe guidelines.",
+        "safety": "Safe",
+        "icon": "mdi:shield-check"
+    },
+    "possible": {
+        "state": "Caution advised for swimming. Young children or elderly may be at increased risk.",
+        "risk": "Pollution Possible",
+        "details": "Recent rainfall may have caused temporary elevation in bacteria.",
+        "safety": "Caution",
+        "icon": "mdi:shield-alert"
+    },
+    "likely": {
+        "state": "Water quality is unsuitable for swimming. Avoid swimming today.",
+        "risk": "Pollution Likely",
+        "details": "Bacteria levels are likely to exceed safe limits.",
+        "safety": "Unsafe",
+        "icon": "mdi:shield-off"
+    },
+    "forecast not available": {
+        "state": "No forecast today. Check for signs of pollution before swimming.",
+        "risk": "No Forecast",
+        "details": "No predictive model is currently active for this site.",
+        "safety": "Unknown",
+        "icon": "mdi:shield-off-outline"
+    }
+}
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    """Set up sensors from config entry."""
+    """Set up NSW Beachwatch sensors."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
-
     sensors = [
         BeachwatchSensor(coordinator, entry, "swimming_safety"),
-        BeachwatchSensor(coordinator, entry, "swimming_advice"),
-        BeachwatchSensor(coordinator, entry, "water_quality"),
+        BeachwatchSensor(coordinator, entry, "advice"),
+        BeachwatchSensor(coordinator, entry, "latest_results"),
         BeachwatchSensor(coordinator, entry, "water_quality_rating"),
+        BeachwatchSensor(coordinator, entry, "pollution_alerts"),
     ]
-
     async_add_entities(sensors)
 
 
 class BeachwatchSensor(CoordinatorEntity, SensorEntity):
-    """Representation of NSW Beachwatch sensor."""
+    """Representation of a Beachwatch sensor."""
 
-    def __init__(self, coordinator, entry, sensor_type):
+    def __init__(self, coordinator, entry, key):
+        """Initialize the sensor."""
         super().__init__(coordinator)
-        self._sensor_type = sensor_type
+        self._key = key
         self._beach_name = entry.data["beach_name"]
-
-        self._attr_unique_id = f"{entry.entry_id}_{sensor_type}"
+        self._attr_unique_id = f"{entry.entry_id}_{key}"
         self._attr_has_entity_name = True
-
+        self._attr_translation_key = key
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name=self._beach_name,
             manufacturer=MANUFACTURER,
             model=MODEL,
+            configuration_url="https://www.beachwatch.nsw.gov.au"
         )
 
+        # Set default icons
+        if key == "advice":
+            self._attr_icon = "mdi:swim"
+        elif key == "latest_results":
+            self._attr_icon = "mdi:microscope"
+        elif key == "water_quality_rating":
+            self._attr_icon = "mdi:chart-line"
+        elif key == "pollution_alerts":
+            self._attr_icon = "mdi:alert-circle-outline"
+
     @property
-    def name(self):
-        names = {
-            "swimming_safety": "Swimming Safety",
-            "swimming_advice": "Swimming Advice",
-            "water_quality": "Water Quality Test",
-            "water_quality_rating": "Water Quality History",
-        }
-        return names[self._sensor_type]
+    def icon(self):
+        """Return the icon to use in the frontend."""
+        if self._key == "swimming_safety":
+            data = self.coordinator.data
+            if data:
+                forecast = str(data.get("forecast", "Unknown")).lower()
+                return ADVICE_MAP.get(forecast, {}).get("icon", "mdi:shield-off-outline")
+
+        if self._key == "pollution_alerts":
+            data = self.coordinator.data
+            if data:
+                alerts = data.get("alerts", [])
+                if alerts:
+                    return "mdi:alert-circle"
+                return "mdi:check-circle"
+
+        return self._attr_icon
 
     @property
     def native_unit_of_measurement(self):
-        if self._sensor_type == "water_quality_rating":
+        """Return the unit of measurement."""
+        if self._key == "water_quality_rating":
             return "Stars"
         return None
 
     @property
     def native_value(self):
+        """Return the state of the sensor."""
         data = self.coordinator.data
         if not data:
             return None
 
-        forecast = (data.get("forecast") or "").lower()
+        forecast = str(data.get("forecast", "Unknown")).lower()
 
-        if self._sensor_type == "swimming_safety":
-            if forecast == "pollution unlikely":
-                return "Safe"
-            if forecast == "pollution possible":
-                return "Caution"
-            if forecast == "pollution likely":
-                return "Unsafe"
-            return "Unknown"
+        if self._key == "swimming_safety":
+            return ADVICE_MAP.get(forecast, {}).get("safety", "Unknown")
 
-        if self._sensor_type == "swimming_advice":
-            if forecast == "pollution unlikely":
-                return "Water quality is suitable for swimming. Enjoy a swim!"
-            if forecast == "pollution possible":
-                return "Caution advised for swimming. Young children or elderly may be at increased risk."
-            if forecast == "pollution likely":
-                return "Water quality is unsuitable for swimming. Avoid swimming today."
-            return "No forecast today. Check for signs of pollution before swimming."
+        if self._key == "advice":
+            return ADVICE_MAP.get(forecast, {}).get("state", "Check local signs.")
 
-        if self._sensor_type == "water_quality":
-            return data.get("latest_result") or "Awaiting Lab Results"
+        if self._key == "latest_results":
+            result = data.get("latest_result")
+            return result if result else "Awaiting Lab Results"
 
-        if self._sensor_type == "water_quality_rating":
+        if self._key == "water_quality_rating":
             return data.get("stars")
+
+        if self._key == "pollution_alerts":
+            alerts = data.get("alerts", [])
+            if not alerts:
+                return "No Active Warnings"
+            alert_count = len(alerts)
+            if alert_count == 1:
+                return "1 Active Warning"
+            return f"{alert_count} Active Warnings"
 
         return None
 
     @property
     def extra_state_attributes(self):
-        """Return extra attributes."""
+        """Return additional attributes."""
+        attrs = {}
         data = self.coordinator.data
         if not data:
-            return {}
+            return attrs
 
-        attrs = {}
+        if self._key in ["advice", "swimming_safety"]:
+            lat = data.get("latitude")
+            lon = data.get("longitude")
+            if lat is not None and lon is not None:
+                attrs["latitude"] = float(lat)
+                attrs["longitude"] = float(lon)
 
-        # Common attributes
-        if data.get("latitude") is not None and data.get("longitude") is not None:
-            attrs["latitude"] = float(data["latitude"])
-            attrs["longitude"] = float(data["longitude"])
+            forecast = str(data.get("forecast", "Unknown")).lower()
+            advice_info = ADVICE_MAP.get(forecast, {})
+            attrs["risk_level"] = advice_info.get("risk", "Unknown")
+            attrs["risk_meaning"] = advice_info.get("details", "Check for signs of pollution.")
 
-        if data.get("forecast_date"):
-            dt = dt_util.parse_datetime(data["forecast_date"])
-            if dt:
-                attrs["last_official_update"] = dt_util.as_local(dt).isoformat()
+            raw_update = data.get("forecast_date")
+            if raw_update:
+                dt = dt_util.parse_datetime(raw_update)
+                if dt:
+                    local_dt = dt_util.as_local(dt)
+                    day = local_dt.day
+                    month = local_dt.strftime("%B")
+                    year = local_dt.year
+                    hour = local_dt.hour % 12
+                    if hour == 0:
+                        hour = 12
+                    minute = local_dt.strftime("%M")
+                    second = local_dt.strftime("%S")
+                    period = local_dt.strftime("%p")
+                    attrs["last_official_update"] = f"{day} {month} {year} {hour}:{minute}:{second} {period}"
 
-        # Swimming sensors attributes
-        if self._sensor_type in ["swimming_safety", "swimming_advice"]:
-            attrs["risk_level"] = data.get("forecast")
+        if self._key == "latest_results":
+            bacteria = data.get("bacteria")
+            stars = data.get("stars")
 
-        # Water quality attributes
-        if self._sensor_type == "water_quality":
-            if data.get("bacteria") is not None:
-                attrs["enterococci_level"] = f"{data['bacteria']} cfu/100mL"
-
-            if data.get("sample_date"):
+            if bacteria is not None:
                 try:
-                    dt_obj = datetime.fromisoformat(
-                        data["sample_date"].replace("Z", "+00:00")
-                    )
-                    attrs["last_sample_date"] = dt_obj.date().isoformat()
-                except Exception:
-                    attrs["last_sample_date"] = data["sample_date"]
+                    bacteria_num = float(bacteria)
+                    attrs["enterococci_level"] = f"{bacteria_num} cfu/100mL"
+                except (ValueError, TypeError):
+                    attrs["enterococci_level"] = str(bacteria)
+            elif stars is not None and stars in STAR_RATING_MAP:
+                rating_info = STAR_RATING_MAP[stars]
+                attrs["enterococci_level"] = rating_info["range"]
+                attrs["water_quality_description"] = rating_info["description"]
+            else:
+                attrs["enterococci_level"] = "Not available"
+
+            raw_date = data.get("sample_date")
+            if raw_date:
+                try:
+                    date_obj = datetime.fromisoformat(raw_date.replace('Z', '+00:00'))
+                    attrs["last_sample_date"] = date_obj.strftime("%d %B %Y")
+                except:
+                    attrs["last_sample_date"] = raw_date.split("T")[0]
+
+        if self._key == "pollution_alerts":
+            alerts = data.get("alerts", [])
+            attrs["alert_count"] = len(alerts)
+
+            if alerts:
+                for idx, alert in enumerate(alerts, 1):
+                    prefix = f"alert_{idx}"
+                    attrs[f"{prefix}_type"] = alert.get("Type", "Warning")
+                    attrs[f"{prefix}_text"] = alert.get("Text", "")
+                    attrs[f"{prefix}_source"] = alert.get("Source", "Beachwatch")
+
+                    last_updated = alert.get("LastUpdated")
+                    if last_updated:
+                        try:
+                            dt = datetime.fromisoformat(last_updated.replace('+00:00', '+00:00'))
+                            attrs[f"{prefix}_last_updated"] = dt.strftime("%d %B %Y %I:%M %p")
+                        except:
+                            attrs[f"{prefix}_last_updated"] = last_updated
+
+                    url = alert.get("Url")
+                    if url:
+                        attrs[f"{prefix}_url"] = url
+
+            region = data.get("region")
+            council = data.get("council")
+            if region:
+                attrs["region"] = region
+            if council:
+                attrs["council"] = council
 
         attrs["attribution"] = "Data provided by NSW Beachwatch"
         return attrs
