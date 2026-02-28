@@ -19,7 +19,7 @@
 
 ## 🌟 Features
 
-- **Real-time Pollution Forecasts** - Daily predictions based on rainfall and pollution events
+- **Pollution Forecasts** - Daily predictions based on rainfall and pollution events
 - **Laboratory Water Quality Results** - Bacterial testing with safety ratings (1-5 stars)
 - **4 Sensors Per Beach** - Comprehensive monitoring for each location
 - **Dynamic Safety Icons** - Visual indicators that change based on conditions
@@ -326,6 +326,7 @@ Made with ❤️ for the Home Assistant community
 [![Star this repository](https://img.shields.io/github/stars/PlanetCitizen1829381/ha-nsw-beachwatch?style=social)](https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/stargazers)
 
 </div>
+
 
 
 
