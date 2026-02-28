@@ -1,6 +1,6 @@
 # NSW Beachwatch Integration
 
-🌊 Real-time water quality forecasts and swimming safety advice for NSW beaches.
+🌊 Swimming safety advice and Water quality forecasts for NSW beaches.
 
 ## Features
 
