@@ -59,6 +59,13 @@ ADVICE_MAP = {
     }
 }
 
+SENSOR_NAMES = {
+    "swimming_safety": "Swimming Safety",
+    "advice": "Swimming Advice",
+    "latest_results": "Water Quality Test",
+    "water_quality_rating": "Water Quality History",
+}
+
 
 async def async_setup_entry(hass, entry, async_add_entities):
     """Set up NSW Beachwatch sensors."""
@@ -81,8 +88,7 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
         self._key = key
         self._beach_name = entry.data["beach_name"]
         self._attr_unique_id = f"{entry.entry_id}_{key}"
-        self._attr_has_entity_name = True
-        self._attr_translation_key = key
+        self._attr_name = f"{self._beach_name} {SENSOR_NAMES[key]}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name=self._beach_name,
@@ -153,6 +159,9 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
             if lat is not None and lon is not None:
                 attrs["beach_latitude"] = float(lat)
                 attrs["beach_longitude"] = float(lon)
+                # Required for HA map card to plot this entity
+                attrs["latitude"] = float(lat)
+                attrs["longitude"] = float(lon)
 
             forecast = str(data.get("forecast", "Unknown")).lower()
             advice_info = ADVICE_MAP.get(forecast, {})
