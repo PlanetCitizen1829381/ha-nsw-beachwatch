@@ -1,6 +1,6 @@
 """NSW Beachwatch sensors."""
 import logging
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorEntity, SensorStateClass
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.util import dt as dt_util
@@ -94,6 +94,10 @@ class BeachwatchSensor(CoordinatorEntity, SensorEntity):
             model=MODEL,
             configuration_url="https://www.beachwatch.nsw.gov.au"
         )
+
+        # water_quality_rating is a numeric sensor - give it a state class so HA graphs it
+        if key == "water_quality_rating":
+            self._attr_state_class = SensorStateClass.MEASUREMENT
 
         if key == "advice":
             self._attr_icon = "mdi:swim"
