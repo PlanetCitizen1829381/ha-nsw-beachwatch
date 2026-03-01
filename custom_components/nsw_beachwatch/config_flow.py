@@ -111,7 +111,7 @@ class NswBeachwatchOptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
-        current_interval = self.config_entry.options.get("update_interval", 60)
+        current_interval = self.config_entry.options.get("update_interval", 120)
 
         return self.async_show_form(
             step_id="init",
