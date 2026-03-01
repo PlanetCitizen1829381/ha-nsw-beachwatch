@@ -10,10 +10,8 @@ from homeassistant.helpers.selector import (
     NumberSelectorConfig,
     NumberSelectorMode,
 )
-
 from .api import NSWBeachwatchAPI
 from .const import DOMAIN
-
 
 class NswBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for NSW Beachwatch."""
@@ -32,14 +30,11 @@ class NswBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 data=user_input
             )
 
-        # Fetch available beaches
         try:
             api = NSWBeachwatchAPI(self.hass)
             beaches = await api.get_all_beaches()
-
             if not beaches:
                 return self.async_abort(reason="cannot_connect")
-
         except Exception:
             errors["base"] = "cannot_connect"
             beaches = []
@@ -64,26 +59,59 @@ class NswBeachwatchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
+    async def async_step_reconfigure(self, user_input=None):
+        """Handle reconfiguration."""
+        errors = {}
+
+        if user_input is not None:
+            await self.async_set_unique_id(user_input["beach_name"])
+            self._abort_if_unique_id_configured()
+            return self.async_update_reload_and_abort(
+                self._get_reconfigure_entry(),
+                data=user_input,
+            )
+
+        try:
+            api = NSWBeachwatchAPI(self.hass)
+            beaches = await api.get_all_beaches()
+            if not beaches:
+                return self.async_abort(reason="cannot_connect")
+        except Exception:
+            errors["base"] = "cannot_connect"
+            beaches = []
+
+        current_beach = self._get_reconfigure_entry().data.get("beach_name")
+
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=vol.Schema({
+                vol.Required("beach_name", default=current_beach): SelectSelector(
+                    SelectSelectorConfig(
+                        options=beaches,
+                        mode=SelectSelectorMode.DROPDOWN,
+                        sort=True,
+                    )
+                ),
+            }),
+            errors=errors,
+        )
+
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
         """Get the options flow for this handler."""
-        return NswBeachwatchOptionsFlowHandler(config_entry)
+        return NswBeachwatchOptionsFlowHandler()
 
 
 class NswBeachwatchOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle options flow for NSW Beachwatch."""
-
-    def __init__(self, config_entry):
-        """Initialize options flow."""
-        self.config_entry = config_entry
 
     async def async_step_init(self, user_input=None):
         """Manage the options."""
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
-        current_interval = self.config_entry.options.get("update_interval", 120)
+        current_interval = self.config_entry.options.get("update_interval", 60)
 
         return self.async_show_form(
             step_id="init",
