@@ -196,7 +196,7 @@ This sensor provides the numerical star rating (1-5) for historical tracking and
 
 | Data Type | Update Frequency | Details |
 |-----------|-----------------|---------|
-| **Forecasts** | Twice Daily | 6:00 AM & 1:30 PM AEST/AEDT |
+| **Forecasts** | Twice Daily | 6:00 AM & 1:30 PM AEST/AEDT - HA will refresh based on your configured interval time | 
 | **Lab Results** | As Available | Typically weekly, varies by beach |
 | **Annual Grades** | Yearly | October - See [State of the Beaches Report](https://www.beachwatch.nsw.gov.au/stateOfTheBeaches) |
 
@@ -328,6 +328,7 @@ Made with ❤️ for the Home Assistant community
 [![Star this repository](https://img.shields.io/github/stars/PlanetCitizen1829381/ha-nsw-beachwatch?style=social)](https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/stargazers)
 
 </div>
+
 
 
 
