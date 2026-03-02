@@ -1,5 +1,6 @@
 """NSW Beachwatch API client."""
 import logging
+from urllib.parse import urlencode
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 _LOGGER = logging.getLogger(__name__)
@@ -27,6 +28,7 @@ class NSWBeachwatchAPI:
                 timeout=15
             ) as response:
                 if response.status != 200:
+                    _LOGGER.error(f"Failed to fetch beach list: HTTP {response.status}")
                     return []
                 data = await response.json()
                 beaches = []
@@ -35,20 +37,23 @@ class NSWBeachwatchAPI:
                     if name:
                         beaches.append(name)
                 return sorted(list(set(beaches)))
-        except Exception:
+        except Exception as e:
+            _LOGGER.error(f"Error fetching beach list: {e}")
             return []
 
     async def get_beach_status(self, beach_name):
         """Get beach status."""
         session = async_get_clientsession(self.hass)
-
-        url = f"{self.base_url}/geojson?site_name={beach_name.replace(' ', '%20')}"
+        params = urlencode({"site_name": beach_name})
+        url = f"{self.base_url}/geojson?{params}"
         try:
             async with session.get(url, headers=self.headers, timeout=15) as response:
                 if response.status != 200:
+                    _LOGGER.error(f"HTTP {response.status} for {beach_name}")
                     return None
                 data = await response.json()
                 if not data or "features" not in data or not data["features"]:
+                    _LOGGER.warning(f"No features returned for {beach_name} - beach name may not match API exactly")
                     return None
 
                 feature = data["features"][0]
