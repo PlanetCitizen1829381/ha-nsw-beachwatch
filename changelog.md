@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.3] - 02-03-2026
+### Fixed
+- Fixed URL encoding for beach names using `urlencode()` to correctly handle all special characters
+- Added automatic retry after 60 seconds if a beach data fetch fails
+- Added startup batch spacing to respect the API rate limit of 24 requests per minute (beaches 25+ are staggered by 60 seconds)
+- Improved error logging in `api.py` to better identify the cause of fetch failures
+
 ## [1.2.2] - 02-03-2026
 ### Fixed
 - Reconfigure flow now works correctly (previously returned 500 Internal Server Error)
@@ -49,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Beach conditions dashboard card
 
 ---
+[1.2.3]: https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/releases/tag/v1.2.3
 [1.2.2]: https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/releases/tag/v1.2.2
 [1.2.1]: https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/releases/tag/v1.2.1
 [1.2.0]: https://github.com/PlanetCitizen1829381/ha-nsw-beachwatch/releases/tag/v1.2.0
